@@ -2493,6 +2493,11 @@ class PlayState extends MusicBeatState
 
 				var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote);
 				swagNote.mustPress = gottaHitNote;
+				if(gottaHitNote){
+					swagNote.isOppNote = daNoteData > 3;
+				}else{
+					swagNote.isOppNote = daNoteData < 4;
+				}
 				swagNote.sustainLength = songNotes[2];
 				swagNote.gfNote = (section.gfSection && (songNotes[1]<4));
 				swagNote.noteType = songNotes[3];
@@ -2513,6 +2518,11 @@ class PlayState extends MusicBeatState
 
 						var sustainNote:Note = new Note(daStrumTime + (Conductor.stepCrochet * susNote) + (Conductor.stepCrochet / FlxMath.roundDecimal(songSpeed, 2)), daNoteData, oldNote, true);
 						sustainNote.mustPress = gottaHitNote;
+						if(gottaHitNote){
+							sustainNote.isOppNote = daNoteData > 3;
+						}else{
+							sustainNote.isOppNote = daNoteData < 4;
+						}
 						sustainNote.gfNote = (section.gfSection && (songNotes[1]<4));
 						sustainNote.noteType = swagNote.noteType;
 						sustainNote.scrollFactor.set();
