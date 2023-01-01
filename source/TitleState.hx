@@ -29,12 +29,38 @@ import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
 import flixel.system.FlxSound;
 import flixel.system.ui.FlxSoundTray;
-import flixel.text.FlxText;
+import flixel.text.FlxTextNew as FlxText;
+import flixel.text.FlxText.FlxTextBorderStyle;
+
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
 import openfl.Assets;
+import flixel.FlxSprite;
+import flixel.FlxCamera;
+import flixel.util.FlxColor;
+import flixel.FlxBasic;
+import flixel.FlxObject;
+import flixel.FlxSprite;
+import openfl.Lib;
+import openfl.display.BlendMode;
+import openfl.filters.BitmapFilter;
+import openfl.utils.Assets;
+import flixel.math.FlxMath;
+import flixel.util.FlxSave;
+import flixel.addons.transition.FlxTransitionableState;
+import flixel.system.FlxAssets.FlxShader;
+import MusicBeatState.ModchartSprite;
+import MusicBeatState.ModchartText;
+
+#if hscript
+import hscript.Parser;
+import hscript.Interp;
+import hscript.Expr;
+import PlayState.FunkinUtil;
+import FunkinLua.HScript;
+#end
 
 using StringTools;
 typedef TitleData =
@@ -51,12 +77,19 @@ typedef TitleData =
 }
 class TitleState extends MusicBeatState
 {
+	#if hscript
+	public static var hscript:HScript = null;
+	#end
+	
+
 	public static var muteKeys:Array<FlxKey> = [FlxKey.ZERO];
 	public static var volumeDownKeys:Array<FlxKey> = [FlxKey.NUMPADMINUS, FlxKey.MINUS];
 	public static var volumeUpKeys:Array<FlxKey> = [FlxKey.NUMPADPLUS, FlxKey.PLUS];
-
+	public static var funk:FunkinUtil;
+	
 	public static var initialized:Bool = false;
 
+	var instance:TitleState;
 	var blackScreen:FlxSprite;
 	var credGroup:FlxGroup;
 	var credTextShit:Alphabet;
@@ -84,17 +117,37 @@ class TitleState extends MusicBeatState
 
 	public static var updateVersion:String = '';
 
+
+	#if hscript
+	public function initHaxeModule()
+	{
+		if(hscript == null)
+		{
+			trace('initializing haxe interp for TitleState');
+			hscript = new HScript(); //TO DO: Fix issue with 2 scripts not being able to use the same variable names
+			hscript.interp.variables.set('game', instance);
+			hscript.interp.variables.set('funk', funk);
+		}
+	}
+	#end
+
 	override public function create():Void
 	{
+		
 		Paths.clearStoredMemory();
 		Paths.clearUnusedMemory();
 
+		instance = this;
+		
+		funk = new FunkinUtil(instance);
+		
 		#if LUA_ALLOWED
 		Paths.pushGlobalMods();
 		#end
 		// Just to load a mod on start up if ya got one. For mods that change the menu music and bg
 		WeekData.loadTheFirstEnabledMod();
 
+		
 		//trace(path, FileSystem.exists(path));
 
 		/*#if (polymod && !html5)
@@ -257,6 +310,8 @@ class TitleState extends MusicBeatState
 			if(FlxG.sound.music == null) {
 				FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
 			}
+
+			
 		}
 
 		Conductor.changeBPM(titleJSON.bpm);
@@ -407,6 +462,17 @@ class TitleState extends MusicBeatState
 			initialized = true;
 
 		// credGroup.add(credTextShit);
+
+		try{
+			#if hscript
+			initHaxeModule();
+			var y:String = Paths.getTextFromFile("data/TitleStateAddons.hx");
+			hscript.execute(y);
+			#end
+		}
+		catch(err){
+			trace(err);
+		}
 	}
 
 	function getIntroColors():Array<FlxColor>
@@ -721,6 +787,8 @@ class TitleState extends MusicBeatState
 					skipIntro();
 			}
 		}
+
+		
 	}
 
 	var skippedIntro:Bool = false;

@@ -7,7 +7,9 @@ import flixel.addons.transition.FlxTransitionableState;
 import flixel.util.FlxColor;
 import flixel.FlxSprite;
 import flixel.FlxG;
-import flixel.text.FlxText;
+import flixel.text.FlxTextNew as FlxText;
+import flixel.text.FlxText.FlxTextBorderStyle;
+
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.math.FlxMath;

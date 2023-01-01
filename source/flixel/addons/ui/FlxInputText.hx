@@ -4,6 +4,7 @@ import lime.system.Clipboard;
 import flash.errors.Error;
 import flash.events.KeyboardEvent;
 import flash.geom.Rectangle;
+import flash.display.BitmapData;
 import flixel.addons.ui.FlxUI.NamedString;
 import flixel.FlxG;
 import flixel.FlxSprite;
@@ -241,6 +242,80 @@ class FlxInputText extends FlxText
 		calcFrame();
 	}
 
+	static inline var VERTICAL_GUTTER:Int = 4;
+
+	//Using Neo's fix here too 
+	override function regenGraphic():Void
+	{
+		
+		if (textField == null || !_regen)
+			return;
+
+		var oldWidth:Int = 0;
+		var oldHeight:Int = VERTICAL_GUTTER;
+
+		if (graphic != null)
+		{
+			oldWidth = graphic.width;
+			oldHeight = graphic.height;
+		}
+
+		var newWidth:Int = Math.ceil(textField.width);
+		// Account for gutter
+		var newHeight:Int = Math.ceil(textField.textHeight) + VERTICAL_GUTTER;
+
+		// prevent text height from shrinking on flash if text == ""
+		if (textField.textHeight == 0)
+		{
+			newHeight = oldHeight;
+		}
+
+		if (oldWidth != newWidth || oldHeight != newHeight)
+		{
+			// Need to generate a new buffer to store the text graphic
+			height = newHeight;
+			var key:String = FlxG.bitmap.getUniqueKey("text");
+			makeGraphic(newWidth, newHeight, FlxColor.TRANSPARENT, false, key);
+
+			if (_hasBorderAlpha)
+				_borderPixels = graphic.bitmap.clone();
+			frameHeight = newHeight;
+			textField.height = height * 1.2;
+			_flashRect.x = 0;
+			_flashRect.y = 0;
+			_flashRect.width = newWidth;
+			_flashRect.height = newHeight;
+		}
+		else // Else just clear the old buffer before redrawing the text
+		{
+			graphic.bitmap.fillRect(_flashRect, FlxColor.TRANSPARENT);
+			if (_hasBorderAlpha)
+			{
+				if (_borderPixels == null)
+					_borderPixels = new BitmapData(frameWidth, frameHeight, true);
+				else
+					_borderPixels.fillRect(_flashRect, FlxColor.TRANSPARENT);
+			}
+		}
+
+		if (textField != null && textField.text != null && textField.text.length > 0)
+		{
+			// Now that we've cleared a buffer, we need to actually render the text to it
+			copyTextFormat(_defaultFormat, _formatAdjusted);
+
+			_matrix.identity();
+
+			applyBorderStyle();
+			applyBorderTransparency();
+			applyFormats(_formatAdjusted, false);
+
+			drawTextFieldTo(graphic.bitmap);
+		}
+
+		_regen = false;
+		resetFrame();
+	}
+	
 	/**
 	 * Clean up memory
 	 */

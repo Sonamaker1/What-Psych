@@ -4,7 +4,9 @@ import flixel.util.FlxStringUtil;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
-import flixel.text.FlxText;
+import flixel.text.FlxTextNew as FlxText;
+import flixel.text.FlxText.FlxTextBorderStyle;
+
 import flixel.group.FlxSpriteGroup;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.util.FlxColor;
@@ -22,7 +24,7 @@ class NoteOffsetState extends MusicBeatState
 	var gf:Character;
 
 	public var camHUD:FlxCamera;
-	public var camGame:FlxCamera;
+	//public var camGame:FlxCamera;
 	public var camOther:FlxCamera;
 
 	var coolText:FlxText;

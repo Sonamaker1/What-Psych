@@ -9,7 +9,9 @@ import flixel.addons.display.FlxGridOverlay;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.math.FlxMath;
-import flixel.text.FlxText;
+import flixel.text.FlxTextNew as FlxText;
+import flixel.text.FlxText.FlxTextBorderStyle;
+
 import flixel.util.FlxColor;
 import flixel.system.FlxSound;
 import flixel.addons.ui.FlxInputText;
@@ -62,7 +64,7 @@ class DialogueCharacterEditorState extends MusicBeatState
 	var offsetIdleText:FlxText;
 	var animText:FlxText;
 
-	var camGame:FlxCamera;
+	//var camGame:FlxCamera;
 	var camHUD:FlxCamera;
 
 	var mainGroup:FlxSpriteGroup;

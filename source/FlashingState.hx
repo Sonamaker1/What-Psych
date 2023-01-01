@@ -3,7 +3,9 @@ package;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.FlxSubState;
-import flixel.text.FlxText;
+import flixel.text.FlxTextNew as FlxText;
+import flixel.text.FlxText.FlxTextBorderStyle;
+
 import flixel.util.FlxColor;
 import flixel.effects.FlxFlicker;
 import lime.app.Application;
