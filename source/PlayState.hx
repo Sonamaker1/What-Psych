@@ -4068,9 +4068,9 @@ typedef GameplayOptions =
 
 class FunkinUtil  {
 
-	static var utilInstance:MusicBeatState;
-	static var playInstance:PlayState;
-	static var isPlayState:Bool;
+	public static var utilInstance:MusicBeatState;
+	public static var playInstance:PlayState;
+	public static var isPlayState:Bool;
 
 	public function new(inputInstance:MusicBeatState, ?isPlay:Bool = false){
 		utilInstance = inputInstance;
@@ -4080,7 +4080,7 @@ class FunkinUtil  {
 		}
 	}
 
-    public static inline function getInstance():FlxUIState
+    public static function getInstance():FlxUIState
     {
         var dead:Bool = false;
         try{
@@ -5652,11 +5652,11 @@ class FunkinUtil  {
                     }
                     else
                     {
-                        var position:Int = utilInstance.members.indexOf(playInstance.gfGroup);
+                        var position:Int = playInstance.members.indexOf(playInstance.gfGroup);
                         if(utilInstance.members.indexOf(playInstance.boyfriendGroup) < position) {
-                            position = utilInstance.members.indexOf(playInstance.boyfriendGroup);
+                            position = playInstance.members.indexOf(playInstance.boyfriendGroup);
                         } else if(utilInstance.members.indexOf(playInstance.dadGroup) < position) {
-                            position = utilInstance.members.indexOf(playInstance.dadGroup);
+                            position = playInstance.members.indexOf(playInstance.dadGroup);
                         }
                         playInstance.insert(position, shit);
                     }
@@ -6449,6 +6449,17 @@ class FunkinUtil  {
         }
         return null;
     }
+
+	public function setProperty(variable:String, value:Dynamic) {
+		var killMe:Array<String> = variable.split('.');
+		if(killMe.length > 1) {
+			setVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1], value);
+			return true;
+		}
+		setVarInArray(getInstance(), variable, value);
+		return true;
+	}
+
     public function setPropertyLuaSprite(tag:String, variable:String, value:Dynamic) {
         funkyTrace("setPropertyLuaSprite is deprecated! Use setProperty instead", false, true);
         if(utilInstance.modchartSprites.exists(tag)) {

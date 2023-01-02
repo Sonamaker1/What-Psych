@@ -60,6 +60,12 @@ import hscript.Interp;
 import hscript.Expr;
 import PlayState.FunkinUtil;
 import FunkinLua.HScript;
+import FunkinLua.CustomSubstate;
+import MusicBeatState.FunkyFunct;
+#if (!flash && sys)
+import flixel.addons.display.FlxRuntimeShader;
+#end
+
 #end
 
 using StringTools;
@@ -116,17 +122,44 @@ class TitleState extends MusicBeatState
 	var titleJSON:TitleData;
 
 	public static var updateVersion:String = '';
-
-
+	public static var gameStages:Map<String,FunkyFunct> = new Map<String,FunkyFunct>();
+	
 	#if hscript
 	public function initHaxeModule()
 	{
+		
+		hscript = null; //man I hate this
+		//TODO: make a destroy function for hscript interpreter
 		if(hscript == null)
 		{
 			trace('initializing haxe interp for TitleState');
 			hscript = new HScript(); //TO DO: Fix issue with 2 scripts not being able to use the same variable names
-			hscript.interp.variables.set('game', instance);
+			hscript.interp.variables.set('game', cast(this,MusicBeatState));
 			hscript.interp.variables.set('funk', funk);
+			hscript.interp.variables.set('FlxG', FlxG);
+			hscript.interp.variables.set('Main', Main);
+			hscript.interp.variables.set('FlxSprite', FlxSprite);
+			hscript.interp.variables.set('FlxCamera', FlxCamera);
+			hscript.interp.variables.set('FlxTimer', FlxTimer);
+			hscript.interp.variables.set('FlxTween', FlxTween);
+			hscript.interp.variables.set('FlxEase', FlxEase);
+			hscript.interp.variables.set('PlayState', PlayState);
+			hscript.interp.variables.set('Paths', Paths);
+			hscript.interp.variables.set('Conductor', Conductor);
+			hscript.interp.variables.set('ClientPrefs', ClientPrefs);
+			hscript.interp.variables.set('Character', Character);
+			hscript.interp.variables.set('Alphabet', Alphabet);
+			hscript.interp.variables.set('CustomSubstate', CustomSubstate);
+			hscript.interp.variables.set('Reflect', Reflect);
+			cast
+			#if (!flash && sys)
+			hscript.interp.variables.set('FlxRuntimeShader', FlxRuntimeShader);
+			hscript.interp.variables.set('FlxShader', FlxShader);
+			#end
+			hscript.interp.variables.set('ShaderFilter', openfl.filters.ShaderFilter);
+			hscript.interp.variables.set('StringTools', StringTools);
+			hscript.interp.variables.set('GameStages', gameStages);
+			
 		}
 	}
 	#end
@@ -317,8 +350,8 @@ class TitleState extends MusicBeatState
 		Conductor.changeBPM(titleJSON.bpm);
 		persistentUpdate = true;
 
-		var bg:FlxSprite = new FlxSprite();
-
+		var bg:ModchartSprite = new ModchartSprite();
+		modchartSprites.set("bg",bg);
 		if (titleJSON.backgroundSprite != null && titleJSON.backgroundSprite.length > 0 && titleJSON.backgroundSprite != "none"){
 			bg.loadGraphic(Paths.image(titleJSON.backgroundSprite));
 		}else{
@@ -663,6 +696,8 @@ class TitleState extends MusicBeatState
 		}
 
 		super.update(elapsed);
+		callStageFunctions('onUpdate', [elapsed]);
+		
 	}
 
 	function createCoolText(textArray:Array<String>, ?offset:Float = 0)
@@ -788,7 +823,7 @@ class TitleState extends MusicBeatState
 			}
 		}
 
-		
+		callStageFunctions('onBeatHit', [sickBeats]);
 	}
 
 	var skippedIntro:Bool = false;
@@ -873,5 +908,6 @@ class TitleState extends MusicBeatState
 			}
 			skippedIntro = true;
 		}
+		callStageFunctions('skipIntro', [skippedIntro]);
 	}
 }
