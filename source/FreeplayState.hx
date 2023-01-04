@@ -153,6 +153,7 @@ class FreeplayState extends MusicBeatState
 		add(scoreText);
 
 		if(curSelected >= songs.length) curSelected = 0;
+		if(songs.length==0) return;
 		bg.color = songs[curSelected].color;
 		intendedColor = bg.color;
 

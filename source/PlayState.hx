@@ -522,7 +522,7 @@ class PlayState extends MusicBeatState
 		switch(curStage)
 		{
 			default:
-				callStageFunctions("foregroundAdd", []);
+				//callStageFunctions("foregroundAdd", []);
 		}
 
 		#if LUA_ALLOWED
@@ -3875,7 +3875,7 @@ class PlayState extends MusicBeatState
 		}
 		#end
 
-		callStageFunctions(event,args);
+		//callStageFunctions(event,args);
 		
 
 		//trace(event, returnVal);
@@ -5636,7 +5636,7 @@ class FunkinUtil  {
             object.scrollFactor.set(scrollX, scrollY);
         }
     }
-    public function addLuaSprite(tag:String, front:Bool = false) {
+    public function addLuaSprite(tag:String, front:Bool = true) {
         if(utilInstance.modchartSprites.exists(tag)) {
             var shit:ModchartSprite = utilInstance.modchartSprites.get(tag);
             if(!shit.wasAdded) {

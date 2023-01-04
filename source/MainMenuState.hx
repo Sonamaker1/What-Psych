@@ -22,6 +22,18 @@ import lime.app.Application;
 import Achievements;
 import editors.MasterEditorMenu;
 import flixel.input.keyboard.FlxKey;
+#if hscript
+import hscript.Parser;
+import hscript.Interp;
+import hscript.Expr;
+import PlayState.FunkinUtil;
+import FunkinLua.HScript;
+import FunkinLua.CustomSubstate;
+import MusicBeatState.FunkyFunct;
+#if (!flash && sys)
+import flixel.addons.display.FlxRuntimeShader;
+#end
+#end
 
 using StringTools;
 
@@ -48,12 +60,56 @@ class MainMenuState extends MusicBeatState
 	var camFollowPos:FlxObject;
 	var debugKeys:Array<FlxKey>;
 
+	var instance:MainMenuState;
+	#if hscript
+	public static var funk:FunkinUtil;
+	public static var gameStages:Map<String,FunkyFunct>;
+	public static var hscript:HScript = null;
+	
+	public function initHaxeModule()
+	{
+		
+		hscript = null; //man I hate this
+		//TODO: make a destroy function for hscript interpreter
+		if(hscript == null)
+		{
+			trace('initializing haxe interp for TitleState');
+			hscript = new HScript(true, gameStages); //TO DO: Fix issue with 2 scripts not being able to use the same variable names
+			hscript.interp.variables.set('game', cast(this,MusicBeatState));
+			hscript.interp.variables.set('funk', funk);
+		}
+	}
+
+	public function startHScript(name:String){
+		#if hscript
+		try{
+			initHaxeModule();
+			var y:String = Paths.getTextFromFile(name);
+			hscript.execute(y);
+		}
+		catch(err){
+			trace(err);
+		}
+		#end
+	}
+
+	public function quickCallHscript(event:String,args:Array<Dynamic>){
+		callStageFunctions(event,args,gameStages);
+	}
+	#end
+
 	override function create()
 	{
 		#if MODS_ALLOWED
 		Paths.pushGlobalMods();
 		#end
 		WeekData.loadTheFirstEnabledMod();
+
+		#if hscript
+		gameStages = new Map<String,FunkyFunct>();
+		instance = this;
+		funk = new PlayState.FunkinUtil(instance);
+		#end
 
 		#if desktop
 		// Updating Discord Rich Presence
@@ -129,6 +185,12 @@ class MainMenuState extends MusicBeatState
 			menuItem.updateHitbox();
 		}
 
+		//W: Moved these here for sanity
+		menuItems.forEach(function(spr:FlxSprite)
+		{
+			spr.screenCenter(X);
+		});
+
 		FlxG.camera.follow(camFollowPos, null, 1);
 
 		var versionShit:FlxText = new FlxText(12, FlxG.height - 44, 0, "Psych Engine v" + psychEngineVersion, 12);
@@ -158,6 +220,7 @@ class MainMenuState extends MusicBeatState
 		#end
 
 		super.create();
+		startHScript("data/MainMenuAddons.hx");
 	}
 
 	#if ACHIEVEMENTS_ALLOWED
@@ -267,10 +330,7 @@ class MainMenuState extends MusicBeatState
 
 		super.update(elapsed);
 
-		menuItems.forEach(function(spr:FlxSprite)
-		{
-			spr.screenCenter(X);
-		});
+		quickCallHscript("update",[elapsed]);
 	}
 
 	function changeItem(huh:Int = 0)
@@ -298,5 +358,6 @@ class MainMenuState extends MusicBeatState
 				spr.centerOffsets();
 			}
 		});
+		quickCallHscript("changeItem",[curSelected]);
 	}
 }

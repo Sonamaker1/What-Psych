@@ -65,7 +65,6 @@ import MusicBeatState.FunkyFunct;
 #if (!flash && sys)
 import flixel.addons.display.FlxRuntimeShader;
 #end
-
 #end
 
 using StringTools;
@@ -83,19 +82,14 @@ typedef TitleData =
 }
 class TitleState extends MusicBeatState
 {
-	#if hscript
-	public static var hscript:HScript = null;
-	#end
 	
 
 	public static var muteKeys:Array<FlxKey> = [FlxKey.ZERO];
 	public static var volumeDownKeys:Array<FlxKey> = [FlxKey.NUMPADMINUS, FlxKey.MINUS];
 	public static var volumeUpKeys:Array<FlxKey> = [FlxKey.NUMPADPLUS, FlxKey.PLUS];
-	public static var funk:FunkinUtil;
 	
 	public static var initialized:Bool = false;
 
-	var instance:TitleState;
 	var blackScreen:FlxSprite;
 	var credGroup:FlxGroup;
 	var credTextShit:Alphabet;
@@ -122,9 +116,13 @@ class TitleState extends MusicBeatState
 	var titleJSON:TitleData;
 
 	public static var updateVersion:String = '';
-	public static var gameStages:Map<String,FunkyFunct> = new Map<String,FunkyFunct>();
 	
 	#if hscript
+	var instance:TitleState;
+	public static var funk:FunkinUtil;
+	public static var gameStages:Map<String,FunkyFunct>;
+	public static var hscript:HScript = null;
+	
 	public function initHaxeModule()
 	{
 		
@@ -133,34 +131,25 @@ class TitleState extends MusicBeatState
 		if(hscript == null)
 		{
 			trace('initializing haxe interp for TitleState');
-			hscript = new HScript(); //TO DO: Fix issue with 2 scripts not being able to use the same variable names
+			hscript = new HScript(true, gameStages); //TO DO: Fix issue with 2 scripts not being able to use the same variable names
 			hscript.interp.variables.set('game', cast(this,MusicBeatState));
 			hscript.interp.variables.set('funk', funk);
-			hscript.interp.variables.set('FlxG', FlxG);
-			hscript.interp.variables.set('Main', Main);
-			hscript.interp.variables.set('FlxSprite', FlxSprite);
-			hscript.interp.variables.set('FlxCamera', FlxCamera);
-			hscript.interp.variables.set('FlxTimer', FlxTimer);
-			hscript.interp.variables.set('FlxTween', FlxTween);
-			hscript.interp.variables.set('FlxEase', FlxEase);
-			hscript.interp.variables.set('PlayState', PlayState);
-			hscript.interp.variables.set('Paths', Paths);
-			hscript.interp.variables.set('Conductor', Conductor);
-			hscript.interp.variables.set('ClientPrefs', ClientPrefs);
-			hscript.interp.variables.set('Character', Character);
-			hscript.interp.variables.set('Alphabet', Alphabet);
-			hscript.interp.variables.set('CustomSubstate', CustomSubstate);
-			hscript.interp.variables.set('Reflect', Reflect);
-			cast
-			#if (!flash && sys)
-			hscript.interp.variables.set('FlxRuntimeShader', FlxRuntimeShader);
-			hscript.interp.variables.set('FlxShader', FlxShader);
-			#end
-			hscript.interp.variables.set('ShaderFilter', openfl.filters.ShaderFilter);
-			hscript.interp.variables.set('StringTools', StringTools);
-			hscript.interp.variables.set('GameStages', gameStages);
-			
 		}
+	}
+
+	public function startHScript(name:String){
+		try{
+			initHaxeModule();
+			var y:String = Paths.getTextFromFile(name);
+			hscript.execute(y);
+		}
+		catch(err){
+			trace(err);
+		}
+	}
+
+	public function quickCallHscript(event:String,args:Array<Dynamic>){
+		callStageFunctions(event,args,gameStages);
 	}
 	#end
 
@@ -170,10 +159,13 @@ class TitleState extends MusicBeatState
 		Paths.clearStoredMemory();
 		Paths.clearUnusedMemory();
 
+		
+		#if hscript
+		gameStages = new Map<String,FunkyFunct>();
 		instance = this;
-		
 		funk = new FunkinUtil(instance);
-		
+		#end
+
 		#if LUA_ALLOWED
 		Paths.pushGlobalMods();
 		#end
@@ -496,16 +488,7 @@ class TitleState extends MusicBeatState
 
 		// credGroup.add(credTextShit);
 
-		try{
-			#if hscript
-			initHaxeModule();
-			var y:String = Paths.getTextFromFile("data/TitleStateAddons.hx");
-			hscript.execute(y);
-			#end
-		}
-		catch(err){
-			trace(err);
-		}
+		startHScript("data/TitleStateAddons.hx");		
 	}
 
 	function getIntroColors():Array<FlxColor>
@@ -696,7 +679,7 @@ class TitleState extends MusicBeatState
 		}
 
 		super.update(elapsed);
-		callStageFunctions('onUpdate', [elapsed]);
+		quickCallHscript('onUpdate', [elapsed]);
 		
 	}
 
@@ -823,7 +806,7 @@ class TitleState extends MusicBeatState
 			}
 		}
 
-		callStageFunctions('onBeatHit', [sickBeats]);
+		quickCallHscript('onBeatHit', [sickBeats]);
 	}
 
 	var skippedIntro:Bool = false;
@@ -908,6 +891,6 @@ class TitleState extends MusicBeatState
 			}
 			skippedIntro = true;
 		}
-		callStageFunctions('skipIntro', [skippedIntro]);
+		quickCallHscript('skipIntro', [skippedIntro]);
 	}
 }

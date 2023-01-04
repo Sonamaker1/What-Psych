@@ -55,6 +55,7 @@ import DialogueBoxPsych;
 import hscript.Parser;
 import hscript.Interp;
 import hscript.Expr;
+import MusicBeatState.FunkyFunct;
 #end
 
 #if desktop
@@ -3376,7 +3377,7 @@ class HScript
 		return interp.variables;
 	}
 
-	public function new()
+	public function new(?addons:Bool,?gameStages:Map<String,FunkyFunct>)
 	{
 		interp = new Interp();
 		interp.variables.set('FlxG', FlxG);
@@ -3398,7 +3399,9 @@ class HScript
 		#end
 		interp.variables.set('ShaderFilter', openfl.filters.ShaderFilter);
 		interp.variables.set('StringTools', StringTools);
-
+		interp.variables.set('FlxAxes', flixel.util.FlxAxes);
+		interp.variables.set('Std', Std);
+		
 		interp.variables.set('setVar', function(name:String, value:Dynamic)
 		{
 			PlayState.instance.variables.set(name, value);
@@ -3418,6 +3421,39 @@ class HScript
 			}
 			return false;
 		});
+
+		if(addons){
+			interp.variables.set('FlxG', FlxG);
+			interp.variables.set('Main', Main);
+			interp.variables.set('FlxSprite', FlxSprite);
+			interp.variables.set('FlxCamera', FlxCamera);
+			interp.variables.set('FlxTimer', FlxTimer);
+			interp.variables.set('FlxTween', FlxTween);
+			interp.variables.set('FlxEase', FlxEase);
+			interp.variables.set('PlayState', PlayState);
+			interp.variables.set('Paths', Paths);
+			interp.variables.set('Conductor', Conductor);
+			interp.variables.set('ClientPrefs', ClientPrefs);
+			interp.variables.set('Character', Character);
+			interp.variables.set('Alphabet', Alphabet);
+			interp.variables.set('CustomSubstate', CustomSubstate);
+			interp.variables.set('Reflect', Reflect);
+			cast
+			#if (!flash && sys)
+			interp.variables.set('FlxRuntimeShader', FlxRuntimeShader);
+			interp.variables.set('FlxShader', FlxShader);
+			#end
+			interp.variables.set('ShaderFilter', openfl.filters.ShaderFilter);
+			interp.variables.set('StringTools', StringTools);
+			interp.variables.set('MusicBeatState',MusicBeatState);
+			interp.variables.set('FlxText',FlxText );
+			interp.variables.set('FlxTextBorderStyle',FlxTextBorderStyle);
+			#if desktop
+			interp.variables.set('DiscordClient',Discord.DiscordClient);
+			#end
+			if(gameStages!=null)
+				interp.variables.set('GameStages', gameStages);
+		}
 	}
 
 	public function execute(codeToRun:String):Dynamic

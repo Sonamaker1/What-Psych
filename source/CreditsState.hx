@@ -21,6 +21,19 @@ import sys.io.File;
 #end
 import lime.utils.Assets;
 
+#if hscript
+import hscript.Parser;
+import hscript.Interp;
+import hscript.Expr;
+import PlayState.FunkinUtil;
+import FunkinLua.HScript;
+import FunkinLua.CustomSubstate;
+import MusicBeatState.FunkyFunct;
+#if (!flash && sys)
+import flixel.addons.display.FlxRuntimeShader;
+#end
+#end
+
 using StringTools;
 
 class CreditsState extends MusicBeatState
@@ -39,11 +52,52 @@ class CreditsState extends MusicBeatState
 
 	var offsetThing:Float = -75;
 
+	var instance:CreditsState;
+	#if hscript
+	public static var funk:FunkinUtil;
+	public static var gameStages:Map<String,FunkyFunct>;
+	public static var hscript:HScript = null;
+	
+	public static var iconMap:Map<Alphabet,FlxSprite> = new Map<Alphabet,FlxSprite>();
+	
+	public function initHaxeModule()
+	{
+		
+		hscript = null; //man I hate this
+		//TODO: make a destroy function for hscript interpreter
+		try{
+			if(hscript == null)
+			{
+				trace('initializing haxe interp for CreditsState');
+				hscript = new HScript(true, gameStages); //TO DO: Fix issue with 2 scripts not being able to use the same variable names
+				hscript.interp.variables.set('game', cast(this,MusicBeatState));
+				hscript.interp.variables.set('funk', funk);
+				hscript.interp.variables.set('iconMap', iconMap);
+			}
+		}catch(err){
+			trace("Failed to intialize HScript (CreditsState)");
+		}
+	}
+	#end
+
+	public function quickCallHscript(event:String,args:Array<Dynamic>){
+		#if hscript
+		callStageFunctions(event,args,gameStages);
+		#end
+	}
+	
+
 	override function create()
 	{
 		#if desktop
 		// Updating Discord Rich Presence
 		DiscordClient.changePresence("In the Menus", null);
+		#end
+
+		#if hscript
+		gameStages = new Map<String,FunkyFunct>();
+		instance = this;
+		funk = new PlayState.FunkinUtil(instance);
 		#end
 
 		persistentUpdate = true;
@@ -121,7 +175,6 @@ class CreditsState extends MusicBeatState
 			optionText.changeX = false;
 			optionText.snapToPosition();
 			grpOptions.add(optionText);
-
 			if(isSelectable) {
 				if(creditsStuff[i][5] != null)
 				{
@@ -140,6 +193,8 @@ class CreditsState extends MusicBeatState
 				if(curSelected == -1) curSelected = i;
 			}
 			else optionText.alignment = CENTERED;
+			quickCallHscript("addedOptionText",[optionText]);
+			
 		}
 		
 		descBox = new AttachedSprite();
@@ -159,8 +214,17 @@ class CreditsState extends MusicBeatState
 
 		bg.color = getCurrentBGColor();
 		intendedColor = bg.color;
+
+
 		changeSelection();
 		super.create();
+
+		#if hscript
+		initHaxeModule();
+		runHScript("data/CreditsAddons.hx",hscript);
+		#end
+		
+		quickCallHscript("changeSelection",[]);
 	}
 
 	var quitting:Bool = false;
@@ -218,6 +282,7 @@ class CreditsState extends MusicBeatState
 				MusicBeatState.switchState(new MainMenuState());
 				quitting = true;
 			}
+			
 		}
 		
 		for (item in grpOptions.members)
@@ -238,6 +303,7 @@ class CreditsState extends MusicBeatState
 			}
 		}
 		super.update(elapsed);
+		quickCallHscript("update",[elapsed]);
 	}
 
 	var moveTween:FlxTween = null;
@@ -288,6 +354,7 @@ class CreditsState extends MusicBeatState
 
 		descBox.setGraphicSize(Std.int(descText.width + 20), Std.int(descText.height + 25));
 		descBox.updateHitbox();
+		quickCallHscript("changeSelection",[curSelected]);
 	}
 
 	#if MODS_ALLOWED
@@ -312,6 +379,7 @@ class CreditsState extends MusicBeatState
 			creditsStuff.push(['']);
 		}
 		modsAdded.push(folder);
+		
 	}
 	#end
 

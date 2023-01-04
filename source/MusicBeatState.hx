@@ -65,13 +65,24 @@ class MusicBeatState extends FlxUIState
 	public var modchartSaves:Map<String, FlxSave> = new Map();
 	#end
 	public var runtimeShaders:Map<String, Array<String>> = new Map<String, Array<String>>();
-	public static var gameStages:Map<String,FunkyFunct> = new Map<String,FunkyFunct>();
+	//public static var gameStages:Map<String,FunkyFunct> = new Map<String,FunkyFunct>();
 	
 
 	public static var camBeat:FlxCamera;
 
 	inline function get_controls():Controls
 		return PlayerSettings.player1.controls;
+
+	public function runHScript(name:String, hscript:FunkinLua.HScript){
+		try{
+			var y:String = Paths.getTextFromFile(name);
+			hscript.execute(y);
+		}
+		catch(err){
+			trace(err);
+		}
+	}
+
 
 	override function create() {
 		camBeat = FlxG.camera;
@@ -113,7 +124,7 @@ class MusicBeatState extends FlxUIState
 
 	public function onVideoEnd(filepath:String, success:Bool)
 	{
-		callStageFunctions("onVideoEnd",[filepath, success]);
+		//callStageFunctions("onVideoEnd",[filepath, success]);
 	}
 
 	public function startVideo(name:String)
@@ -155,11 +166,11 @@ class MusicBeatState extends FlxUIState
 	}
 
 	public function callOnLuas(event:String, args:Array<Dynamic>, ignoreStops = true, exclusions:Array<String> = null):Dynamic {
-		callStageFunctions(event,args);
+		//callStageFunctions(event,args);
 		return 0;
 	}
 
-	public function callStageFunctions(event:String,args:Array<Dynamic>){
+	public function callStageFunctions(event:String,args:Array<Dynamic>,gameStages:Map<String,FunkyFunct>){
 		try{
 			var ret = gameStages.get(event);
 			if(ret != null){
@@ -169,6 +180,7 @@ class MusicBeatState extends FlxUIState
 				gameParameters.set("args", args);
 				ret.func();*/
 			}
+			//trace(ret+"("+event+")");
 		}
 		catch(err){
 			trace("\n["+event+"] Stage Function Error: " + err);
@@ -186,6 +198,7 @@ class MusicBeatState extends FlxUIState
 			sectionHit();
 		}
 	}
+
 
 	private function rollbackSection():Void
 	{
