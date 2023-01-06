@@ -3448,11 +3448,20 @@ class HScript
 			interp.variables.set('MusicBeatState',MusicBeatState);
 			interp.variables.set('FlxText',FlxText );
 			interp.variables.set('FlxTextBorderStyle',FlxTextBorderStyle);
+			
+			//Thanks Neo!
+			interp.variables.set("import", function(pkg) {
+				var a = pkg.split(".");
+				var e = Type.resolveEnum(pkg);
+				interp.variables.set(a[a.length-1], e!=null?e:Type.resolveClass(pkg));
+			});
+
 			#if desktop
 			interp.variables.set('DiscordClient',Discord.DiscordClient);
 			#end
 			if(gameStages!=null)
 				interp.variables.set('GameStages', gameStages);
+			
 		}
 	}
 
