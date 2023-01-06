@@ -4801,6 +4801,21 @@ class FunkinUtil  {
     }
     */
 
+	public function addHaxeLibrary(haxeInterpret:FunkinLua.HScript, libName:String, ?libPackage:String = '') {
+        #if hscript
+        var str:String = '';
+        try {
+            if(libPackage!=null && libPackage.length > 0)
+                str = libPackage + '.';
+			trace(Type.resolveClass(str + libName));
+            haxeInterpret.interp.variables.set(libName, Type.resolveClass(str + libName));
+        }
+        catch (e:Dynamic) {
+            funkyTrace(e+"\naddHaxeLibrary: failed to init [" + str+libName+"]");
+        }
+        #end
+    }
+
     public function loadSong(?name:String = null, ?difficultyNum:Int = -1) {
         if(isPlayState){
 			if(name == null || name.length < 1)

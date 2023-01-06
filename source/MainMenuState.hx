@@ -77,6 +77,7 @@ class MainMenuState extends MusicBeatState
 			hscript = new HScript(true, gameStages); //TO DO: Fix issue with 2 scripts not being able to use the same variable names
 			hscript.interp.variables.set('game', cast(this,MusicBeatState));
 			hscript.interp.variables.set('funk', funk);
+			hscript.interp.variables.set('this', hscript);
 		}
 	}
 
