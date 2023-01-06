@@ -24,10 +24,61 @@ import WeekData;
 import sys.FileSystem;
 #end
 
+#if hscript
+import hscript.Parser;
+import hscript.Interp;
+import hscript.Expr;
+import PlayState.FunkinUtil;
+import FunkinLua.HScript;
+import FunkinLua.CustomSubstate;
+import MusicBeatState.FunkyFunct;
+#if (!flash && sys)
+import flixel.addons.display.FlxRuntimeShader;
+#end
+#end
+
 using StringTools;
+
 
 class FreeplayState extends MusicBeatState
 {
+
+	var instance:FreeplayState;
+	#if hscript
+	public static var funk:FunkinUtil;
+	public static var gameStages:Map<String,FunkyFunct>;
+	public static var hscript:HScript = null;
+
+	public static var iconMap:Map<Alphabet,FlxSprite> = new Map<Alphabet,FlxSprite>();
+
+	public function initHaxeModule()
+	{
+		
+		hscript = null; //man I hate this
+		//TODO: make a destroy function for hscript interpreter
+		try{
+			if(hscript == null)
+			{
+				trace('initializing haxe interp for FreeplayState');
+				hscript = new HScript(true, gameStages); //TO DO: Fix issue with 2 scripts not being able to use the same variable names
+				hscript.interp.variables.set('game', cast(this,MusicBeatState));
+				hscript.interp.variables.set('funk', funk);
+				hscript.interp.variables.set('FreeplayState', FreeplayState);
+				hscript.interp.variables.set('iconMap', iconMap);
+			}
+		}catch(err){
+			trace("Failed to intialize HScript (FreeplayState)");
+		}
+	}
+	#end
+
+	public function quickCallHscript(event:String,args:Array<Dynamic>){
+		#if hscript
+		callStageFunctions(event,args,gameStages);
+		#end
+	}
+
+
 	var songs:Array<SongMetadata> = [];
 
 	var selector:FlxText;
@@ -64,6 +115,12 @@ class FreeplayState extends MusicBeatState
 		#if desktop
 		// Updating Discord Rich Presence
 		DiscordClient.changePresence("In the Menus", null);
+		#end
+
+		#if hscript
+		gameStages = new Map<String,FunkyFunct>();
+		instance = this;
+		funk = new PlayState.FunkinUtil(instance);
 		#end
 
 		for (i in 0...WeekData.weeksList.length) {
@@ -201,6 +258,13 @@ class FreeplayState extends MusicBeatState
 		text.scrollFactor.set();
 		add(text);
 		super.create();
+		#if hscript
+		initHaxeModule();
+		runHScript("data/FreeplayAddons.hx",hscript);
+		#end
+		
+		quickCallHscript("changeSelection",[]);
+		quickCallHscript("changeDiff",[]);
 	}
 
 	override function closeSubState() {
@@ -352,6 +416,7 @@ class FreeplayState extends MusicBeatState
 				vocals.volume = 0.7;
 				instPlaying = curSelected;
 				#end
+				quickCallHscript("playInst",[instPlaying]);
 			}
 		}
 
@@ -397,6 +462,7 @@ class FreeplayState extends MusicBeatState
 			FlxG.sound.play(Paths.sound('scrollMenu'));
 		}
 		super.update(elapsed);
+		quickCallHscript("update",[elapsed]);
 	}
 
 	public static function destroyFreeplayVocals() {
@@ -426,6 +492,7 @@ class FreeplayState extends MusicBeatState
 		PlayState.storyDifficulty = curDifficulty;
 		diffText.text = '< ' + CoolUtil.difficultyString() + ' >';
 		positionHighscore();
+		quickCallHscript("changeDiff",[curDifficulty]);
 	}
 
 	function changeSelection(change:Int = 0, playSound:Bool = true)
@@ -525,6 +592,8 @@ class FreeplayState extends MusicBeatState
 		{
 			curDifficulty = newPos;
 		}
+
+		quickCallHscript("changeSelection",[curSelected, playSound]);
 	}
 
 	private function positionHighscore() {
