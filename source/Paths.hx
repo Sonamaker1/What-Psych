@@ -249,6 +249,9 @@ class Paths
 			trace(path);
 			return File.getContent(path);
 		}
+		else if(!FileSystem.exists(path)){
+			trace(path+": will not be loaded (does not exist)");
+		}
 		#end
 
 		path = getPreloadPath(key);

@@ -21,10 +21,57 @@ import lime.net.curl.CURLCode;
 import flixel.graphics.FlxGraphic;
 import WeekData;
 
+#if hscript
+import hscript.Parser;
+import hscript.Interp;
+import hscript.Expr;
+import PlayState.FunkinUtil;
+import FunkinLua.HScript;
+import FunkinLua.CustomSubstate;
+import MusicBeatState.FunkyFunct;
+#if (!flash && sys)
+import flixel.addons.display.FlxRuntimeShader;
+#end
+#end
+
 using StringTools;
 
 class StoryMenuState extends MusicBeatState
 {
+
+	var instance:StoryMenuState;
+	#if hscript
+	public static var funk:FunkinUtil;
+	public static var gameStages:Map<String,FunkyFunct>;
+	public static var hscript:HScript = null;
+	public static var iconMap:Map<Alphabet,FlxSprite> = new Map<Alphabet,FlxSprite>();
+	
+	public function initHaxeModule()
+	{
+		
+		hscript = null; //man I hate this
+		//TODO: make a destroy function for hscript interpreter
+		try{
+			if(hscript == null)
+			{
+				trace('initializing haxe interp for FreeplayState');
+				hscript = new HScript(true, gameStages); //TO DO: Fix issue with 2 scripts not being able to use the same variable names
+				hscript.interp.variables.set('game', cast(this,MusicBeatState));
+				hscript.interp.variables.set('funk', funk);
+				hscript.interp.variables.set('FreeplayState', FreeplayState);
+				hscript.interp.variables.set('iconMap', iconMap);
+			}
+		}catch(err){
+			trace("Failed to intialize HScript (FreeplayState)");
+		}
+	}
+	#end
+	public function quickCallHscript(event:String,args:Array<Dynamic>){
+		#if hscript
+		callStageFunctions(event,args,gameStages);
+		#end
+	}
+
 	public static var weekCompleted:Map<String, Bool> = new Map<String, Bool>();
 
 	var scoreText:FlxText;
@@ -93,6 +140,12 @@ class StoryMenuState extends MusicBeatState
 		#if desktop
 		// Updating Discord Rich Presence
 		DiscordClient.changePresence("In the Menus", null);
+		#end
+
+		#if hscript
+		gameStages = new Map<String,FunkyFunct>();
+		instance = this;
+		funk = new PlayState.FunkinUtil(instance);
 		#end
 
 		var num:Int = 0;
@@ -188,6 +241,13 @@ class StoryMenuState extends MusicBeatState
 		changeDifficulty();
 
 		super.create();
+
+		#if hscript
+		initHaxeModule();
+		runHScript("data/StoryMenuAddons.hx",hscript);
+		#end
+		quickCallHscript("changeWeek",[]);
+		quickCallHscript("changeDifficulty",[]);
 	}
 
 	override function closeSubState() {
@@ -272,11 +332,15 @@ class StoryMenuState extends MusicBeatState
 
 		super.update(elapsed);
 
+		
 		grpLocks.forEach(function(lock:FlxSprite)
 		{
 			lock.y = grpWeekText.members[lock.ID].y;
 			lock.visible = (lock.y > FlxG.height / 2);
 		});
+
+		quickCallHscript("update",[elapsed]);
+		
 	}
 
 	var movedBack:Bool = false;
@@ -368,6 +432,7 @@ class StoryMenuState extends MusicBeatState
 		#if !switch
 		intendedScore = Highscore.getWeekScore(loadedWeeks[curWeek].fileName, curDifficulty);
 		#end
+		quickCallHscript("changeDiff",[curDifficulty]);
 	}
 
 	var lerpScore:Int = 0;
@@ -452,6 +517,8 @@ class StoryMenuState extends MusicBeatState
 			curDifficulty = newPos;
 		}
 		updateText();
+
+		quickCallHscript("changeWeek",[change]);
 	}
 
 	function weekIsLocked(name:String):Bool {
@@ -486,5 +553,6 @@ class StoryMenuState extends MusicBeatState
 		#if !switch
 		intendedScore = Highscore.getWeekScore(loadedWeeks[curWeek].fileName, curDifficulty);
 		#end
+		quickCallHscript("updateText",[]);
 	}
 }
