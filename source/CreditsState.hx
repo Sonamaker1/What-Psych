@@ -52,6 +52,7 @@ class CreditsState extends MusicBeatState
 
 	var offsetThing:Float = -75;
 
+	public var curMod ="";
 	var instance:CreditsState;
 	#if hscript
 	public static var funk:FunkinUtil;
@@ -89,6 +90,7 @@ class CreditsState extends MusicBeatState
 
 	override function create()
 	{
+		curMod = Paths.currentModDirectory;
 		#if desktop
 		// Updating Discord Rich Presence
 		DiscordClient.changePresence("In the Menus", null);
@@ -193,6 +195,10 @@ class CreditsState extends MusicBeatState
 				if(curSelected == -1) curSelected = i;
 			}
 			else optionText.alignment = CENTERED;
+			
+			//Back to the real deal lol
+			Paths.currentModDirectory = curMod;
+		
 			quickCallHscript("addedOptionText",[optionText]);
 			
 		}
@@ -219,9 +225,10 @@ class CreditsState extends MusicBeatState
 		changeSelection();
 		super.create();
 
+		Paths.currentModDirectory = curMod;
 		#if hscript
 		initHaxeModule();
-		runHScript("data/CreditsAddons.hx",hscript);
+		runHScript("data/CreditsAddons.hx",hscript, curMod);
 		#end
 		
 		quickCallHscript("changeSelection",[]);

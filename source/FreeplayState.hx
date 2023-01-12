@@ -42,7 +42,7 @@ using StringTools;
 
 class FreeplayState extends MusicBeatState
 {
-
+	public var curMod ="";
 	var instance:FreeplayState;
 	#if hscript
 	public static var funk:FunkinUtil;
@@ -107,7 +107,7 @@ class FreeplayState extends MusicBeatState
 	{
 		//Paths.clearStoredMemory();
 		//Paths.clearUnusedMemory();
-		
+		curMod = Paths.currentModDirectory;
 		persistentUpdate = true;
 		PlayState.isStoryMode = false;
 		WeekData.reloadWeekFiles(false);
@@ -182,6 +182,7 @@ class FreeplayState extends MusicBeatState
 			}
 			songText.snapToPosition();
 
+			
 			Paths.currentModDirectory = songs[i].folder;
 			var icon:HealthIcon = new HealthIcon(songs[i].songCharacter);
 			icon.sprTracker = songText;
@@ -258,9 +259,12 @@ class FreeplayState extends MusicBeatState
 		text.scrollFactor.set();
 		add(text);
 		super.create();
+
+		//Back to the real deal lol
+		Paths.currentModDirectory = curMod;
 		#if hscript
 		initHaxeModule();
-		runHScript("data/FreeplayAddons.hx",hscript);
+		runHScript("data/FreeplayAddons.hx",hscript, curMod);
 		#end
 		
 		quickCallHscript("changeSelection",[]);
@@ -416,6 +420,10 @@ class FreeplayState extends MusicBeatState
 				vocals.volume = 0.7;
 				instPlaying = curSelected;
 				#end
+
+				//Back to the real deal lol
+				Paths.currentModDirectory = curMod;
+				
 				quickCallHscript("playInst",[instPlaying]);
 			}
 		}
@@ -550,6 +558,7 @@ class FreeplayState extends MusicBeatState
 			}
 		}
 		
+		
 		Paths.currentModDirectory = songs[curSelected].folder;
 		PlayState.storyWeek = songs[curSelected].week;
 
@@ -593,6 +602,9 @@ class FreeplayState extends MusicBeatState
 			curDifficulty = newPos;
 		}
 
+		//Back to the real deal lol
+		Paths.currentModDirectory = curMod;
+		
 		quickCallHscript("changeSelection",[curSelected, playSound]);
 	}
 

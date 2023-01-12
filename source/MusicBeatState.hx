@@ -73,9 +73,27 @@ class MusicBeatState extends FlxUIState
 	inline function get_controls():Controls
 		return PlayerSettings.player1.controls;
 
-	public function runHScript(name:String, hscript:FunkinLua.HScript){
+	public function runHScript(name:String, hscript:FunkinLua.HScript, ?modFolder:String=""){
 		try{
-			var y:String = Paths.getTextFromFile(name);
+			var path:String = "mods/"+modFolder+"/"+name; // Paths.getTextFromFile(name);
+			var y = '';
+			//PLEASE WORK 
+			if (FileSystem.exists(path)){
+				trace(path);
+				y = File.getContent(path);
+			}else if(FileSystem.exists(Paths.modFolders(modFolder+"/"+name))){
+				trace(Paths.modFolders(modFolder+"/"+name));
+				y = File.getContent(path);
+			}else if(FileSystem.exists(modFolder+"/"+name)){
+				trace(modFolder+"/"+name);
+				y = File.getContent(path);
+			}else if(FileSystem.exists(Paths.modFolders(name))){
+				trace(Paths.modFolders(name));
+				y = File.getContent(path);
+			}else{
+				trace(path + "Does not exist");
+				y = Paths.getTextFromFile(modFolder+"/"+name);
+			}
 			hscript.execute(y);
 		}
 		catch(err){
