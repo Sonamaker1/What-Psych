@@ -73,7 +73,7 @@ class MusicBeatState extends FlxUIState
 	inline function get_controls():Controls
 		return PlayerSettings.player1.controls;
 
-	public function runHScript(name:String, hscript:FunkinLua.HScript, ?modFolder:String=""){
+	public function runHScript(name:String, hscript:FunkinLua.HScript, ?modFolder:String="", ?isCustomState:Bool=false){
 		try{
 			var path:String = "mods/"+modFolder+"/"+name; // Paths.getTextFromFile(name);
 			var y = '';
@@ -93,6 +93,9 @@ class MusicBeatState extends FlxUIState
 			}else{
 				trace(path + "Does not exist");
 				y = Paths.getTextFromFile(modFolder+"/"+name);
+				if(isCustomState){
+					MusicBeatState.switchState(new MainMenuState());
+				}
 			}
 			hscript.execute(y);
 		}

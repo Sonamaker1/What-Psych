@@ -21,6 +21,8 @@ import flixel.util.FlxTimer;
 import flixel.input.keyboard.FlxKey;
 import openfl.events.KeyboardEvent;
 import FunkinLua;
+//Not needed... yet
+import ClickableSprite;
 
 using StringTools;
 

@@ -18,7 +18,7 @@ import flixel.text.FlxTextNew as FlxText;
 import flixel.text.FlxText.FlxTextBorderStyle;
 import MusicBeatState.ModchartSprite;
 import MusicBeatState.ModchartText;
-
+import CustomBeatState;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.math.FlxPoint;
 import flixel.system.FlxSound;
@@ -3446,6 +3446,8 @@ class HScript
 			interp.variables.set('ShaderFilter', openfl.filters.ShaderFilter);
 			interp.variables.set('StringTools', StringTools);
 			interp.variables.set('MusicBeatState',MusicBeatState);
+			interp.variables.set('CustomBeatState',CustomBeatState);
+			
 			interp.variables.set('FlxText',FlxText );
 			interp.variables.set('FlxTextBorderStyle',FlxTextBorderStyle);
 			
