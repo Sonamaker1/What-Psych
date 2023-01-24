@@ -1,5 +1,5 @@
 # WhatEngine
-Fork of Psych Engine 
+Fork of [Psych Engine](https://github.com/ShadowMario/FNF-PsychEngine/)
 
 This engine fork is mainly for educational use and proof-of-concept menu UI edits, please do not use it for large mods. It is currently a bit messy but I'm still learning how to make it better lol.
 
