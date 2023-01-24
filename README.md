@@ -1,14 +1,19 @@
-# WhatEngine
-Fork of [Psych Engine](https://github.com/ShadowMario/FNF-PsychEngine/)
+# WhatEngine 
 
-This engine fork is mainly for educational use and proof-of-concept menu UI edits, please do not use it for large mods. It is currently a bit messy but I'm still learning how to make it better lol.
+<table>
+  <tr>
+    <td><img src="https://github.com/Sonamaker1/What-Psych/blob/main/art/WhatTitle.png?raw=true" width="400" /> 
+</td>
+    <td><p>This engine fork is mainly for educational use and proof-of-concept menu UI edits, please do not use it for large mods.</p> <p>It is currently a bit messy but I'm still learning how to make it better lol.</p><p>I'd love to see what you make with this! More updates are on the way for all the editor state menus (and possibly playstate).
+</p></td>
+  </tr>
+</table>
 
-I'd love to see what you make with this! More updates are on the way for all the editor state menus (and possibly playstate).
 
 ## Credits
 
 - Special Thanks to [Ne_Eo](https://twitter.com/Ne_Eo_Twitch) for the new import function!
-- Also, Special Thanks to [Juno](https://twitter.com/anilmky_nikko) for the What Engine logo!
+- Special Thanks to [Juno](https://twitter.com/anilmky_nikko) for the What Engine logo!
 
 ## Default supported hscript menus:
 - mods/Your Mod/data/TitleStateAddons.hx
