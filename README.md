@@ -31,7 +31,7 @@
 ```haxe
 import("CustomBeatState");
 
-var mus:MusicBeatState = new CustomBeatState("MyCustomState");
+var mus:MusicBeatState = new CustomBeatState("AnyNameYouWant");
 if(mus!=null){
     MusicBeatState.switchState(mus);
 }
