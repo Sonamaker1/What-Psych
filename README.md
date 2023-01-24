@@ -103,5 +103,18 @@ categoryText.screenCenter(FlxAxes.XY);
 game.add(categoryText);
 ```
 
+## What the Funk??
+The funk variable is a class instance that attempts to cover some of the functions you may be used to seeing in lua, but make them all accessible to hscript. They work almost identically. 
 
+Example:
+lua:
+`makeLuaSprite('bgOverlay','curveThing', -100, -200)`
 
+hscript:
+`funk.makeLuaSprite('bgOverlay','curveThing', -100, -200);`
+
+### Game
+The game variable is the instance of the current menu you are on. So to add a sprite or text to the screen you may use game.add() and Reflect functions can be used on the game object as well.
+
+### Errors:
+Hscript-related errors are silently printed in the console for now, an upcoming update will allow window pop ups for quicker access to error logs.
