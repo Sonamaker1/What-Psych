@@ -8,6 +8,7 @@ I'd love to see what you make with this! More updates are on the way for all the
 ## Credits
 
 - Special Thanks to [Ne_Eo](https://twitter.com/Ne_Eo_Twitch) for the new import function!
+- Also, Special Thanks to [Juno](https://twitter.com/anilmky_nikko) for the What Engine logo!
 
 ## Default supported hscript menus:
 - mods/Your Mod/data/TitleStateAddons.hx
