@@ -68,18 +68,8 @@ import flixel.addons.display.FlxRuntimeShader;
 #end
 
 using StringTools;
-typedef TitleData =
-{
+import InitialState.TitleData as TitleData;
 
-	titlex:Float,
-	titley:Float,
-	startx:Float,
-	starty:Float,
-	gfx:Float,
-	gfy:Float,
-	backgroundSprite:String,
-	bpm:Int
-}
 class TitleState extends MusicBeatState
 {
 	

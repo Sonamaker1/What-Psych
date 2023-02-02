@@ -110,8 +110,9 @@ class CustomBeatState extends MusicBeatState
 	
 	override function beatHit()
 	{
-		super.beatHit();
 		quickCallHscript("beatHit",[]);
+		super.beatHit();
+		quickCallHscript("beatHitPost",[]);
 		//FlxG.log.add('beat');
 	}
 	

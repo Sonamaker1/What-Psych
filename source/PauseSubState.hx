@@ -185,9 +185,10 @@ class PauseSubState extends MusicBeatSubstate
 					{
 						curTime += 45000 * elapsed * (controls.UI_LEFT ? -1 : 1);
 					}
-
-					if(curTime >= FlxG.sound.music.length) curTime -= FlxG.sound.music.length;
-					else if(curTime < 0) curTime += FlxG.sound.music.length;
+					if(FlxG.sound.music!=null){
+						if(curTime >= FlxG.sound.music.length) curTime -= FlxG.sound.music.length;
+						else if(curTime < 0) curTime += FlxG.sound.music.length;
+					}
 					updateSkipTimeText();
 				}
 		}
@@ -202,7 +203,7 @@ class PauseSubState extends MusicBeatSubstate
 					PlayState.SONG = Song.loadFromJson(poop, name);
 					PlayState.storyDifficulty = curSelected;
 					MusicBeatState.resetState();
-					FlxG.sound.music.volume = 0;
+					if(FlxG.sound.music!=null){FlxG.sound.music.volume = 0;}
 					PlayState.changedDifficulty = true;
 					PlayState.chartingMode = false;
 					return;
@@ -286,7 +287,7 @@ class PauseSubState extends MusicBeatSubstate
 	public static function restartSong(noTrans:Bool = false)
 	{
 		PlayState.instance.paused = true; // For lua
-		FlxG.sound.music.volume = 0;
+		if(FlxG.sound.music!=null){FlxG.sound.music.volume = 0;}
 		PlayState.instance.vocals.volume = 0;
 
 		if(noTrans)

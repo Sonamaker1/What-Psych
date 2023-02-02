@@ -485,9 +485,9 @@ class ModsMenuState extends MusicBeatState
 			if(needaReset)
 			{
 				//MusicBeatState.switchState(new TitleState());
-				TitleState.initialized = false;
-				TitleState.closedState = false;
-				FlxG.sound.music.fadeOut(0.3);
+				InitialState.initialized = false;
+				InitialState.closedState = false;
+				if(FlxG.sound.music!=null){FlxG.sound.music.fadeOut(0.3);}
 				if(FreeplayState.vocals != null)
 				{
 					FreeplayState.vocals.fadeOut(0.3);

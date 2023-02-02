@@ -198,7 +198,7 @@ class EditorPlayState extends MusicBeatState
 	private function generateSong(dataPath:String):Void
 	{
 		FlxG.sound.playMusic(Paths.inst(PlayState.SONG.song), 0, false);
-		FlxG.sound.music.pause();
+		if(FlxG.sound.music!=null){FlxG.sound.music.pause();}
 		FlxG.sound.music.onComplete = endSong;
 		vocals.pause();
 		vocals.volume = 0;

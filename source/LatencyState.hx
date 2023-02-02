@@ -57,7 +57,7 @@ class LatencyState extends FlxState
 
 		if (FlxG.keys.justPressed.SPACE)
 		{
-			FlxG.sound.music.stop();
+			if(FlxG.sound.music!=null){FlxG.sound.music.stop();}
 
 			FlxG.resetState();
 		}

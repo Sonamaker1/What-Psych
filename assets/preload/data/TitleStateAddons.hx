@@ -1,1 +1,1 @@
-trace("lololololol");
+trace("Hscript Default TitleState");

@@ -89,7 +89,7 @@ class GameOverSubstate extends MusicBeatSubstate
 
 		if (controls.BACK)
 		{
-			FlxG.sound.music.stop();
+			if(FlxG.sound.music!=null){FlxG.sound.music.stop();}
 			PlayState.deathCounter = 0;
 			PlayState.seenCutscene = false;
 			PlayState.chartingMode = false;
@@ -115,7 +115,7 @@ class GameOverSubstate extends MusicBeatSubstate
 
 			if (boyfriend.animation.curAnim.finished && !playingDeathSound)
 			{
-				if (PlayState.SONG.stage == 'tank')
+				/*if (PlayState.SONG.stage == 'tank')
 				{
 					playingDeathSound = true;
 					coolStartDeath(0.2);
@@ -126,19 +126,19 @@ class GameOverSubstate extends MusicBeatSubstate
 					FlxG.sound.play(Paths.sound('jeffGameover/jeffGameover-' + FlxG.random.int(1, 25, exclude)), 1, false, null, true, function() {
 						if(!isEnding)
 						{
-							FlxG.sound.music.fadeIn(0.2, 1, 4);
+							if(FlxG.sound.music!=null){FlxG.sound.music.fadeIn(0.2, 1, 4);}
 						}
 					});
 				}
 				else
-				{
+				{*/
 					coolStartDeath();
-				}
+				//}
 				boyfriend.startedDeath = true;
 			}
 		}
 
-		if (FlxG.sound.music.playing)
+		if(FlxG.sound.music!=null && FlxG.sound.music.playing)
 		{
 			Conductor.songPosition = FlxG.sound.music.time;
 		}
@@ -165,7 +165,7 @@ class GameOverSubstate extends MusicBeatSubstate
 		{
 			isEnding = true;
 			boyfriend.playAnim('deathConfirm', true);
-			FlxG.sound.music.stop();
+			if(FlxG.sound.music!=null){FlxG.sound.music.stop();}
 			FlxG.sound.play(Paths.music(endSoundName));
 			new FlxTimer().start(0.7, function(tmr:FlxTimer)
 			{

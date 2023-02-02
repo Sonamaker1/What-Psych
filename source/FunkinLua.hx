@@ -934,8 +934,10 @@ class FunkinLua {
 			PlayState.instance.persistentUpdate = false;
 			LoadingState.loadAndSwitchState(new PlayState());
 
-			FlxG.sound.music.pause();
-			FlxG.sound.music.volume = 0;
+			if(FlxG.sound.music != null){
+				FlxG.sound.music.pause();
+				FlxG.sound.music.volume = 0;
+			}
 			if(PlayState.instance.vocals != null)
 			{
 				PlayState.instance.vocals.pause();
@@ -2248,7 +2250,7 @@ class FunkinLua {
 			}
 		});
 		Lua_helper.add_callback(lua, "soundFadeIn", function(tag:String, duration:Float, fromValue:Float = 0, toValue:Float = 1) {
-			if(tag == null || tag.length < 1) {
+			if(tag == null || tag.length < 1 && FlxG.sound.music!=null) {
 				FlxG.sound.music.fadeIn(duration, fromValue, toValue);
 			} else if(PlayState.instance.modchartSounds.exists(tag)) {
 				PlayState.instance.modchartSounds.get(tag).fadeIn(duration, fromValue, toValue);
@@ -2256,14 +2258,14 @@ class FunkinLua {
 
 		});
 		Lua_helper.add_callback(lua, "soundFadeOut", function(tag:String, duration:Float, toValue:Float = 0) {
-			if(tag == null || tag.length < 1) {
+			if(tag == null || tag.length < 1 && FlxG.sound.music!=null) {
 				FlxG.sound.music.fadeOut(duration, toValue);
 			} else if(PlayState.instance.modchartSounds.exists(tag)) {
 				PlayState.instance.modchartSounds.get(tag).fadeOut(duration, toValue);
 			}
 		});
 		Lua_helper.add_callback(lua, "soundFadeCancel", function(tag:String) {
-			if(tag == null || tag.length < 1) {
+			if(tag == null || tag.length < 1 && FlxG.sound.music!=null) {
 				if(FlxG.sound.music.fadeTween != null) {
 					FlxG.sound.music.fadeTween.cancel();
 				}
@@ -2738,12 +2740,12 @@ class FunkinLua {
 			return false;
 		});
 		Lua_helper.add_callback(lua, "musicFadeIn", function(duration:Float, fromValue:Float = 0, toValue:Float = 1) {
-			FlxG.sound.music.fadeIn(duration, fromValue, toValue);
+			if(FlxG.sound.music!=null){FlxG.sound.music.fadeIn(duration, fromValue, toValue);}
 			luaTrace('musicFadeIn is deprecated! Use soundFadeIn instead.', false, true);
 
 		});
 		Lua_helper.add_callback(lua, "musicFadeOut", function(duration:Float, toValue:Float = 0) {
-			FlxG.sound.music.fadeOut(duration, toValue);
+			if(FlxG.sound.music!=null){FlxG.sound.music.fadeOut(duration, toValue);}
 			luaTrace('musicFadeOut is deprecated! Use soundFadeOut instead.', false, true);
 		});
 
