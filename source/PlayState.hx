@@ -2051,6 +2051,10 @@ class PlayState extends MusicBeatState
 		vocals.play();
 	}
 
+	public static var maxLuaFPS = 60;
+	var fpsElapsed:Array<Float> = [0,0,0];
+	var numCalls:Array<Float> = [0,0,0];
+
 	public var paused:Bool = false;
 	public var canReset:Bool = true;
 	var startedCountdown:Bool = false;
@@ -2063,7 +2067,26 @@ class PlayState extends MusicBeatState
 		{
 			iconP1.swapOldIcon();
 		}*/
-		callOnLuas('onUpdate', [elapsed]);
+
+		// Limits the number of lua updates to 60/second, which fixes some crashes if FPS > 120
+		// on long songs with multiple scripts that use onUpdate() function
+
+		if(ClientPrefs.framerate <= maxLuaFPS){
+			
+			callOnLuas('onUpdate', [elapsed]);
+		}
+		else {
+			numCalls[0]+=1;
+			fpsElapsed[0]+=elapsed;
+			if(numCalls[0] >= Std.int(ClientPrefs.framerate/maxLuaFPS)){
+				//trace("New Update");
+				callOnLuas('onUpdate', [fpsElapsed[0]]);
+				fpsElapsed[0]=0;
+				numCalls[0]=0;
+
+			}
+		}
+
 		//W: TODO update codes based on the current stage
 		if(!inCutscene) {
 			var lerpVal:Float = CoolUtil.boundTo(elapsed * 2.4 * cameraSpeed * playbackRate, 0, 1);
@@ -2378,7 +2401,21 @@ class PlayState extends MusicBeatState
 		setOnLuas('cameraX', camFollowPos.x);
 		setOnLuas('cameraY', camFollowPos.y);
 		setOnLuas('botPlay', cpuControlled);
-		callOnLuas('onUpdatePost', [elapsed]);
+		
+		//Fix for high fps lua crashes
+		if(ClientPrefs.framerate <= maxLuaFPS){
+			callOnLuas('onUpdatePost', [elapsed]);
+		}
+		else {
+			numCalls[1]+=1;
+			fpsElapsed[1]+=elapsed;
+			if(numCalls[1] >= Std.int(ClientPrefs.framerate/maxLuaFPS)){
+				//trace("New UpdatePost");
+				callOnLuas('onUpdatePost', [fpsElapsed[1]]);
+				fpsElapsed[1]=0;
+				numCalls[1]=0;
+			}
+		}
 	}
 
 	function openPauseMenu()
