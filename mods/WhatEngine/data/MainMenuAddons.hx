@@ -1,3 +1,5 @@
+
+
 trace("brand new bag");
 game.members[0].loadGraphic(Paths.image('sunOil'));
 var u:Int =FlxG.width*1.3;
@@ -30,6 +32,7 @@ bg.color = 0xFFDDDDDD;
 bg.flipX = true;
 game.insert(1,bgover);
 //game.insert(0,bg);
+
 
 
 var i:Int = 0;
@@ -74,4 +77,78 @@ GameStages.set("changeItem",{func:function(curSelected:Int)
 
 }
 });
+
+
+GameStages.set("update",{func:function(?elapsed:float)
+{  
+    //Reset Screen (for testing)
+    if(FlxG.keys.justPressed.R){
+        MusicBeatState.switchState(new MainMenuState());
+    }
+}});
+
+
+var cameraFollowPointer = new FlxSprite();
+trace(cameraFollowPointer);
+cameraFollowPointer.loadGraphic(Paths.image('cursor'));
+//cameraFollowPointer.loadGraphic(pointer);
+cameraFollowPointer.setGraphicSize(0, 40);
+cameraFollowPointer.updateHitbox();
+cameraFollowPointer.color = 0xFFFFFFFF;
+//game.add(cameraFollowPointer);
+
+import("CustomBeatState");
+
+
+import("ClickableSprite");
+var mover:FlxSprite = new ClickableSprite('credits/icon-whatify');
+mover.scrollFactor.set(cameraFollowPointer.scrollFactor.x,cameraFollowPointer.scrollFactor.y);
+
+function clickAndDrag(sprite:ClickableSprite, pos:Dynamic){
+    sprite.setPosition(pos.x - sprite.width / 2, pos.y - sprite.height / 2);
+}
+
+GameStages.set("update",{func:function(elapsed:Float)
+{
+    cameraFollowPointer.setPosition(FlxG.mouse.getPosition().x-2, FlxG.mouse.getPosition().y-2);
+           
+    if(mover.clicked){
+        clickAndDrag(mover,FlxG.mouse.getPosition());
+    }
+    if(game.members.indexOf(cameraFollowPointer)>game.members.length-1){
+        game.remove(cameraFollowPointer);
+        game.insert(game.members.length,cameraFollowPointer);
+    }
+    
+    //Refresh page to test
+    if(FlxG.keys.justPressed.R){
+        MusicBeatState.switchState(new MainMenuState());
+    }
+    
+}
+});
+
+
+//callSpriteFunctions("clicked",[this, FlxG.mouse.getPosition()],functs);
+trace(mover.functs);
+//mover.functs.set("clicked",{func:clickAndDrag});
+//mover.loadGraphic(Paths.image(''));
+//mover.setPosition(200,200);
+game.add(mover);
+game.add(cameraFollowPointer);
+
+
+
+/*
+var Label = "Stage Editor";
+
+var t:FlxUIButton = new FlxUIButton(200, 200, Label);
+t.broadcastToFlxUI = false;
+//t.onUp.callback = onClickItem.bind(i);
+t.name = "StageState";
+
+t.loadGraphicSlice9([FlxUIAssets.IMG_INVIS, FlxUIAssets.IMG_HILIGHT, FlxUIAssets.IMG_HILIGHT], Std.int(300),
+    Std.int(100), [[1, 1, 3, 3], [1, 1, 3, 3], [1, 1, 3, 3]], FlxUI9SliceSprite.TILE_NONE);
+*/
+
 

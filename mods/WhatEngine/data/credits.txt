@@ -1,0 +1,3 @@
+Mod Credits
+Whatify::icon-whatify::Hey there! If you're reading this message you've got an alpha build of the engine.--It's missing a handful of features and has no songs lol. But the point was to get hscript running::https://twitter.com/Sonamaker1::444444
+Juno::icon-juno::Made title logo for What Engine::https://twitter.com/anilmky_nikko::9d54d8

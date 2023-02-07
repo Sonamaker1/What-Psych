@@ -27,8 +27,13 @@ import flixel.util.FlxSave;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.system.FlxAssets.FlxShader;
 
-#if VIDEOS_ALLOWED
+#if VIDEOS_ALLOWED 
+#if windows
 import vlc.MP4Handler;
+#end
+#end
+
+#if !html5
 import sys.FileSystem;
 import sys.io.File;
 #end
@@ -150,9 +155,9 @@ class MusicBeatState extends FlxUIState
 
 	public function startVideo(name:String)
 	{
+		var filepath = Paths.video(name);
 		#if VIDEOS_ALLOWED
 		
-		var filepath:String = Paths.video(name);
 		#if sys
 		if(!FileSystem.exists(filepath))
 		#else
@@ -173,10 +178,12 @@ class MusicBeatState extends FlxUIState
 			return;
 		}
 		#else
+		#if windows
 		FlxG.log.warn('Platform not supported!');
-		onVideoEnd(filepath, false));
+		onVideoEnd(filepath, false);
 		//startAndEnd();
 		return;
+		#end
 		#end
 	}
 

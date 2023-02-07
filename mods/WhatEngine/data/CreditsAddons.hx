@@ -2,6 +2,7 @@
 //trace("its working");
 
 //trace(game.members);
+FlxG.autoPause=false;
 
 //game.members[0].loadGraphic(Paths.image('mockup'));
 game.members[0].alpha=0.6;

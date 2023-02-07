@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Created with Free texture packer v0.6.7 http://free-tex-packer.com
+-->
+<TextureAtlas imagePath="frames.png" width="5760" height="5400">
+  <SubTexture name="thumb0031.png" x="0" y="0"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0001.png" x="0" y="540"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0003.png" x="960" y="0"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0004.png" x="960" y="540"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0005.png" x="0" y="1080"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0006.png" x="960" y="1080"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0007.png" x="0" y="1620"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0008.png" x="960" y="1620"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0009.png" x="1920" y="0"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0010.png" x="1920" y="540"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0011.png" x="1920" y="1080"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0012.png" x="1920" y="1620"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0013.png" x="0" y="2160"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0014.png" x="960" y="2160"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0015.png" x="1920" y="2160"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0016.png" x="0" y="2700"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0017.png" x="960" y="2700"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0018.png" x="1920" y="2700"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0019.png" x="2880" y="0"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0020.png" x="2880" y="540"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0021.png" x="2880" y="1080"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0022.png" x="2880" y="1620"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0023.png" x="2880" y="2160"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0024.png" x="2880" y="2700"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0025.png" x="0" y="3240"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0026.png" x="960" y="3240"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0027.png" x="1920" y="3240"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0028.png" x="2880" y="3240"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0029.png" x="0" y="3780"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0030.png" x="960" y="3780"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0002.png" x="1920" y="3780"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0032.png" x="2880" y="3780"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0033.png" x="3840" y="0"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0034.png" x="3840" y="540"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0035.png" x="3840" y="1080"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0036.png" x="3840" y="1620"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0037.png" x="3840" y="2160"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0038.png" x="3840" y="2700"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0039.png" x="3840" y="3240"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0040.png" x="3840" y="3780"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0041.png" x="0" y="4320"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0042.png" x="960" y="4320"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0043.png" x="1920" y="4320"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0044.png" x="2880" y="4320"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0045.png" x="3840" y="4320"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0046.png" x="4800" y="0"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0047.png" x="4800" y="540"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0048.png" x="4800" y="1080"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0049.png" x="4800" y="1620"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0050.png" x="4800" y="2160"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0051.png" x="4800" y="2700"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0052.png" x="4800" y="3240"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0053.png" x="4800" y="3780"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0054.png" x="4800" y="4320"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0055.png" x="0" y="4860"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0056.png" x="960" y="4860"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0057.png" x="1920" y="4860"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0058.png" x="2880" y="4860"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0059.png" x="3840" y="4860"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+  <SubTexture name="thumb0060.png" x="4800" y="4860"  width="960" height="540" frameX="-0" frameY="-0" frameWidth="960" frameHeight="540"/>
+</TextureAtlas>

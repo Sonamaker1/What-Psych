@@ -6030,13 +6030,15 @@ class FunkinUtil  {
         return false;
 
         #else
+		/*
         if(!isPlayState) return true;
 		if(utilInstance.endingSong) {
             utilInstance.endSong();
         } else {
             utilInstance.startCountdown();
         }
-        return true;
+        return true;*/
+		return false;
         #end
     }
 

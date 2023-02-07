@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Created with Free texture packer v0.6.7 http://free-tex-packer.com
+-->
+<TextureAtlas imagePath="screens" width="3216" height="3936">
+  <SubTexture name="dad" x="4" y="4"  width="1600" height="648" frameX="-0" frameY="-0" frameWidth="1600" frameHeight="648"/>
+  <SubTexture name="hatersim" x="4" y="660"  width="1600" height="648" frameX="-0" frameY="-0" frameWidth="1600" frameHeight="648"/>
+  <SubTexture name="holiday" x="4" y="1316"  width="1600" height="648" frameX="-0" frameY="-0" frameWidth="1600" frameHeight="648"/>
+  <SubTexture name="mom" x="4" y="1972"  width="1600" height="648" frameX="-0" frameY="-0" frameWidth="1600" frameHeight="648"/>
+  <SubTexture name="lemonmonster" x="4" y="2628"  width="1600" height="648" frameX="-0" frameY="-0" frameWidth="1600" frameHeight="648"/>
+  <SubTexture name="monsterholiday" x="4" y="3284"  width="1600" height="648" frameX="-0" frameY="-0" frameWidth="1600" frameHeight="648"/>
+  <SubTexture name="philly" x="1612" y="4"  width="1600" height="648" frameX="-0" frameY="-0" frameWidth="1600" frameHeight="648"/>
+  <SubTexture name="spookykids" x="1612" y="660"  width="1600" height="648" frameX="-0" frameY="-0" frameWidth="1600" frameHeight="648"/>
+  <SubTexture name="stress" x="1612" y="1316"  width="1600" height="648" frameX="-0" frameY="-0" frameWidth="1600" frameHeight="648"/>
+  <SubTexture name="tankman" x="1612" y="1972"  width="1600" height="648" frameX="-0" frameY="-0" frameWidth="1600" frameHeight="648"/>
+  <SubTexture name="thorns" x="1612" y="2628"  width="1600" height="648" frameX="-0" frameY="-0" frameWidth="1600" frameHeight="648"/>
+  <SubTexture name="tutorial" x="1612" y="3284"  width="1600" height="648" frameX="-0" frameY="-0" frameWidth="1600" frameHeight="648"/>
+</TextureAtlas>
