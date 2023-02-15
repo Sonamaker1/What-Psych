@@ -31,7 +31,7 @@ using StringTools;
 
 class CustomFadeTransition extends MusicBeatSubstate {
 	public var curMod ="";
-	var instance:CustomFadeTransition;
+	var instance:MusicBeatSubstate;
 	#if hscript
 	public static var funk:FunkinUtil;
 	public static var gameStages:Map<String,FunkyFunct>;
@@ -57,12 +57,21 @@ class CustomFadeTransition extends MusicBeatSubstate {
 			trace("Failed to intialize HScript (CustomFadeTransition)");
 		}
 	}
-	#end
-	public function quickCallHscript(event:String,args:Array<Dynamic>){
-		#if hscript
-		callStageFunctions(event,args,gameStages);
-		#end
+	public function startHScript(name:String){
+		try{
+			initHaxeModule();
+			var y:String = Paths.getTextFromFile(name);
+			hscript.execute(y);
+		}
+		catch(err){
+			trace(err);
+		}
 	}
+
+	public function quickCallHscript(event:String,args:Array<Dynamic>){
+		callStageFunctions(event,args,gameStages);
+	}
+	#end
 
 	public static var finishCallback:Void->Void;
 	private var leTween:FlxTween = null;
@@ -73,70 +82,96 @@ class CustomFadeTransition extends MusicBeatSubstate {
 
 	var transitionWidth:Int = FlxG.width;
 	var transitionHeight:Int = FlxG.width;
-	
+	var duration:Float = 0.0;
+	var useDefault:Bool = true;
 	public static var defaultTransition = true;
 
 	public function new(duration:Float, isTransIn:Bool) {
 		super();
-
+		#if hscript
+		gameStages = new Map<String,FunkyFunct>();
+		instance = this;
+		funk = new PlayState.FunkinUtil(cast(instance,MusicBeatState));
+		#end
+		this.duration = duration;
 		this.isTransIn = isTransIn;
+		startHScript("data/CustomTransition.hx");
+		
+		
 		var zoom:Float = CoolUtil.boundTo(FlxG.camera.zoom, 0.05, 1);
 		var width:Int = Std.int(FlxG.width / zoom);
 		var height:Int = Std.int(FlxG.height / zoom);
-		transGradient = FlxGradient.createGradientFlxSprite(1, height, (isTransIn ? [0x0, FlxColor.BLACK] : [FlxColor.BLACK, 0x0]));
-		//scaling is less memory expensive
-		transGradient.scale.set(width, 1); // Thanks Ne_Eo!
-		transGradient.updateHitbox();transGradient.scrollFactor.set();
-		add(transGradient);
+		hscript.interp.variables.set("zoom",zoom);
+		hscript.interp.variables.set("width",width);
+		hscript.interp.variables.set("height",height);
+		
+		quickCallHscript("create",[]);
+		
+		if(useDefault){
+			transGradient = FlxGradient.createGradientFlxSprite(1, height, (isTransIn ? [0x0, FlxColor.BLACK] : [FlxColor.BLACK, 0x0]));
+			//scaling is less memory expensive
+			transGradient.scale.set(width, 1); // Thanks Ne_Eo!
+			transGradient.updateHitbox();transGradient.scrollFactor.set();
+			add(transGradient);
 
-		transBlack = new FlxSprite().makeGraphic(width, height + 400, FlxColor.BLACK);
-		transBlack.scrollFactor.set();
-		add(transBlack);
+			transBlack = new FlxSprite().makeGraphic(width, height + 400, FlxColor.BLACK);
+			transBlack.scrollFactor.set();
+			add(transBlack);
 
-		transGradient.x -= (width - FlxG.width) / 2;
-		transBlack.x = transGradient.x;
+			transGradient.x -= (width - FlxG.width) / 2;
+			transBlack.x = transGradient.x;
 
-		if(isTransIn) {
-			transGradient.y = transBlack.y - transBlack.height;
-			FlxTween.tween(transGradient, {y: transGradient.height + 50}, duration, {
-				onComplete: function(twn:FlxTween) {
-					close();
-				},
-			ease: FlxEase.linear});
-		} else {
-			transGradient.y = -transGradient.height;
-			transBlack.y = transGradient.y - transBlack.height + 50;
-			leTween = FlxTween.tween(transGradient, {y: transGradient.height + 50}, duration, {
-				onComplete: function(twn:FlxTween) {
-					if(finishCallback != null) {
-						finishCallback();
-					}
-				},
-			ease: FlxEase.linear});
+			if(isTransIn) {
+				transGradient.y = transBlack.y - transBlack.height;
+				FlxTween.tween(transGradient, {y: transGradient.height + 50}, duration, {
+					onComplete: function(twn:FlxTween) {
+						close();
+					},
+				ease: FlxEase.linear});
+			} else {
+				transGradient.y = -transGradient.height;
+				transBlack.y = transGradient.y - transBlack.height + 50;
+				leTween = FlxTween.tween(transGradient, {y: transGradient.height + 50}, duration, {
+					onComplete: function(twn:FlxTween) {
+						if(finishCallback != null) {
+							finishCallback();
+						}
+					},
+				ease: FlxEase.linear});
+			}
+
+			if(nextCamera != null) {
+				transBlack.cameras = [nextCamera];
+				transGradient.cameras = [nextCamera];
+			}
 		}
-
-		if(nextCamera != null) {
-			transBlack.cameras = [nextCamera];
-			transGradient.cameras = [nextCamera];
-		}
+		quickCallHscript("createPost",[]);
+		
 		nextCamera = null;
 	}
 
 	override function update(elapsed:Float) {
-		if(isTransIn) {
-			transBlack.y = transGradient.y + transGradient.height;
-		} else {
-			transBlack.y = transGradient.y - transBlack.height;
+		if(useDefault){
+			if(isTransIn) {
+				transBlack.y = transGradient.y + transGradient.height;
+			} else {
+				transBlack.y = transGradient.y - transBlack.height;
+			}
 		}
+		quickCallHscript("update",[elapsed]);
 		super.update(elapsed);
-		if(isTransIn) {
-			transBlack.y = transGradient.y + transGradient.height;
-		} else {
-			transBlack.y = transGradient.y - transBlack.height;
+		quickCallHscript("updatePost",[elapsed]);
+		if(useDefault){
+			if(isTransIn) {
+				transBlack.y = transGradient.y + transGradient.height;
+			} else {
+				transBlack.y = transGradient.y - transBlack.height;
+			}
 		}
 	}
 
 	override function destroy() {
+		quickCallHscript("destroy",[]);
 		if(leTween != null) {
 			finishCallback();
 			leTween.cancel();
