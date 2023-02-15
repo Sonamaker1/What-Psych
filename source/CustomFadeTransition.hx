@@ -14,13 +14,67 @@ import flixel.FlxSubState;
 import flixel.FlxSprite;
 import flixel.FlxCamera;
 
+#if hscript
+import hscript.Parser;
+import hscript.Interp;
+import hscript.Expr;
+import PlayState.FunkinUtil;
+import FunkinLua.HScript;
+import FunkinLua.CustomSubstate;
+import MusicBeatState.FunkyFunct;
+#if (!flash && sys)
+import flixel.addons.display.FlxRuntimeShader;
+#end
+#end
+
+using StringTools;
+
 class CustomFadeTransition extends MusicBeatSubstate {
+	public var curMod ="";
+	var instance:CustomFadeTransition;
+	#if hscript
+	public static var funk:FunkinUtil;
+	public static var gameStages:Map<String,FunkyFunct>;
+	public static var hscript:HScript = null;
+	public static var iconMap:Map<Alphabet,FlxSprite> = new Map<Alphabet,FlxSprite>();
+	
+	public function initHaxeModule()
+	{
+		
+		hscript = null; //man I hate this
+		//TODO: make a destroy function for hscript interpreter
+		try{
+			if(hscript == null)
+			{
+				trace('initializing haxe interp for StoryMenuState');
+				hscript = new HScript(true, gameStages); //TO DO: Fix issue with 2 scripts not being able to use the same variable names
+				hscript.interp.variables.set('game', cast(this,MusicBeatSubstate));
+				hscript.interp.variables.set('funk', funk);
+				hscript.interp.variables.set('CustomFadeTransition', CustomFadeTransition);
+				hscript.interp.variables.set('iconMap', iconMap);
+			}
+		}catch(err){
+			trace("Failed to intialize HScript (CustomFadeTransition)");
+		}
+	}
+	#end
+	public function quickCallHscript(event:String,args:Array<Dynamic>){
+		#if hscript
+		callStageFunctions(event,args,gameStages);
+		#end
+	}
+
 	public static var finishCallback:Void->Void;
 	private var leTween:FlxTween = null;
 	public static var nextCamera:FlxCamera;
 	var isTransIn:Bool = false;
 	var transBlack:FlxSprite;
 	var transGradient:FlxSprite;
+
+	var transitionWidth:Int = FlxG.width;
+	var transitionHeight:Int = FlxG.width;
+	
+	public static var defaultTransition = true;
 
 	public function new(duration:Float, isTransIn:Bool) {
 		super();
