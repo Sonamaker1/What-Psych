@@ -35,7 +35,7 @@ class CustomFadeTransition extends MusicBeatSubstate {
 	#if hscript
 	public static var funk:FunkinUtil;
 	public static var gameStages:Map<String,FunkyFunct>;
-	public static var hscript:HScript = null;
+	public var hscript:HScript = null;
 	public static var iconMap:Map<Alphabet,FlxSprite> = new Map<Alphabet,FlxSprite>();
 	
 	public function initHaxeModule()
@@ -48,7 +48,7 @@ class CustomFadeTransition extends MusicBeatSubstate {
 			{
 				trace('initializing haxe interp for StoryMenuState');
 				hscript = new HScript(true, gameStages); //TO DO: Fix issue with 2 scripts not being able to use the same variable names
-				hscript.interp.variables.set('game', cast(this,MusicBeatSubstate));
+				hscript.interp.variables.set('game', this);
 				hscript.interp.variables.set('funk', funk);
 				hscript.interp.variables.set('CustomFadeTransition', CustomFadeTransition);
 				hscript.interp.variables.set('iconMap', iconMap);
@@ -91,7 +91,7 @@ class CustomFadeTransition extends MusicBeatSubstate {
 		#if hscript
 		gameStages = new Map<String,FunkyFunct>();
 		instance = this;
-		funk = new PlayState.FunkinUtil(cast(instance,MusicBeatState));
+		funk = new PlayState.FunkinUtil(instance, false, true);
 		#end
 		this.duration = duration;
 		this.isTransIn = isTransIn;
@@ -101,9 +101,12 @@ class CustomFadeTransition extends MusicBeatSubstate {
 		var zoom:Float = CoolUtil.boundTo(FlxG.camera.zoom, 0.05, 1);
 		var width:Int = Std.int(FlxG.width / zoom);
 		var height:Int = Std.int(FlxG.height / zoom);
-		hscript.interp.variables.set("zoom",zoom);
-		hscript.interp.variables.set("width",width);
-		hscript.interp.variables.set("height",height);
+		if(hscript != null)
+		{
+			hscript.interp.variables.set("zoom",zoom);
+			hscript.interp.variables.set("width",width);
+			hscript.interp.variables.set("height",height);
+		}
 		
 		quickCallHscript("create",[]);
 		
