@@ -26,6 +26,7 @@ import flixel.math.FlxMath;
 import flixel.util.FlxSave;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.system.FlxAssets.FlxShader;
+import flixel.FlxSubState;
 
 #if VIDEOS_ALLOWED 
 #if windows
@@ -38,7 +39,51 @@ import sys.FileSystem;
 import sys.io.File;
 #end
 
-class MusicBeatState extends FlxUIState
+interface BeatStateInterface {
+	public var camGame:FlxCamera;
+	//public var members(default, null):Array<Dynamic>;
+	
+	private var curStep:Int;
+	private var curBeat:Int;
+
+	private var curDecStep:Float;
+	private var curDecBeat:Float;
+	private var controls(get, never):Controls;
+	
+	public function get_controls():Controls;
+
+	public function runHScript(name:String, hscript:FunkinLua.HScript, ?modFolder:String, ?isCustomState:Bool):Void;
+
+	public function getControl(key:String):Bool;
+
+	//public function callStageFunctions(event:String,args:Array<Dynamic>,gameStages:Map<String,FunkyFunct>):Void;
+
+	public var variables:Map<String, Dynamic>;
+	public var modchartTweens:Map<String, FlxTween>;
+	public var modchartSprites:Map<String, ModchartSprite>;
+	public var modchartTimers:Map<String, FlxTimer>;
+	public var modchartSounds:Map<String, FlxSound>;
+	public var modchartTexts:Map<String, ModchartText>;
+	public var modchartSaves:Map<String, FlxSave>;
+	public var runtimeShaders:Map<String, Array<String>>;
+	
+	private function updateBeat():Void;
+
+	private function updateCurStep():Void;
+	public var persistentUpdate:Bool;
+
+	//public function remove(Object:FlxBasic, ?Splice:Bool = false):FlxBasic;
+	public function callOnLuas(event:String, args:Array<Dynamic>, ?ignoreStops:Bool, ?exclusions:Array<String>):Dynamic;
+	
+
+	public function stepHit():Void;
+
+	public function beatHit():Void;
+
+	public function getLuaObject(tag:String, text:Bool=true):FlxSprite;
+}
+
+class MusicBeatState extends FlxUIState implements BeatStateInterface
 {
 	public var camGame:FlxCamera;
 	
@@ -75,7 +120,7 @@ class MusicBeatState extends FlxUIState
 
 	public static var camBeat:FlxCamera;
 
-	inline function get_controls():Controls
+	public function get_controls():Controls
 		return PlayerSettings.player1.controls;
 
 	public function runHScript(name:String, hscript:FunkinLua.HScript, ?modFolder:String="", ?isCustomState:Bool=false){
@@ -119,6 +164,16 @@ class MusicBeatState extends FlxUIState
 			openSubState(new CustomFadeTransition(0.7, true));
 		}
 		FlxTransitionableState.skipNextTransOut = false;
+	}
+
+	override function openSubState(SubState:FlxSubState){
+		PlayState.FunkinUtil.isSubstate=true;
+		super.openSubState(SubState);
+	}
+	
+	override function closeSubState(){
+		PlayState.FunkinUtil.isSubstate=false;
+		super.closeSubState();
 	}
 
 	override function update(elapsed:Float)
@@ -193,7 +248,7 @@ class MusicBeatState extends FlxUIState
 		return pressed;
 	}
 
-	public function callOnLuas(event:String, args:Array<Dynamic>, ignoreStops = true, exclusions:Array<String> = null):Dynamic {
+	public function callOnLuas(event:String, args:Array<Dynamic>, ?ignoreStops = true, ?exclusions:Array<String> = null):Dynamic {
 		//callStageFunctions(event,args);
 		return 0;
 	}
@@ -274,12 +329,12 @@ class MusicBeatState extends FlxUIState
 				CustomFadeTransition.finishCallback = function() {
 					FlxG.resetState();
 				};
-				//trace('resetted');
+				trace('resetted');
 			} else {
 				CustomFadeTransition.finishCallback = function() {
 					FlxG.switchState(nextState);
 				};
-				//trace('changed state');
+				trace('changed state');
 			}
 			return;
 		}
@@ -340,6 +395,8 @@ class ModchartSprite extends FlxSprite
 		antialiasing = ClientPrefs.globalAntialiasing;
 	}
 }
+
+
 
 class ModchartText extends FlxText
 {

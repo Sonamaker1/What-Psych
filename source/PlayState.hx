@@ -67,6 +67,7 @@ import DialogueBoxPsych;
 import Conductor.Rating;
 import MusicBeatState.ModchartSprite;
 import MusicBeatState.ModchartText;
+import MusicBeatState.BeatStateInterface;
 
 #if !flash 
 import flixel.addons.display.FlxRuntimeShader;
@@ -3902,7 +3903,7 @@ class PlayState extends MusicBeatState
 
 	
 
-	override public function callOnLuas(event:String, args:Array<Dynamic>, ignoreStops = true, exclusions:Array<String> = null):Dynamic {
+	override public function callOnLuas(event:String, args:Array<Dynamic>, ?ignoreStops = true, ?exclusions:Array<String> = null):Dynamic {
 		var returnVal:Dynamic = FunkinLua.Function_Continue;
 		#if LUA_ALLOWED
 		if(exclusions == null) exclusions = [];
@@ -4116,30 +4117,90 @@ typedef GameplayOptions =
 class FunkinUtil  {
 
 	public static var utilInstance:MusicBeatState;
+	public static var subInstance:MusicBeatSubstate;
 	public static var playInstance:PlayState;
 	public static var isPlayState:Bool;
+	public static var isSubstate:Bool;
 
-	public function new(inputInstance:MusicBeatState, ?isPlay:Bool = false){
-		utilInstance = inputInstance;
-		if(isPlay){
-			playInstance = cast(inputInstance, PlayState);
-			isPlayState = isPlay;
+	public static function utilInst():BeatStateInterface{
+		if(subInstance!=null){
+			return subInstance;
+		}
+		else{
+			return utilInstance;
 		}
 	}
 
-    public static function getInstance():FlxUIState
-    {
-        var dead:Bool = false;
-        try{
-			var obj:Dynamic = Reflect.getProperty(utilInstance, "isDead");
-			if(obj != null){
-            	dead = obj;
+	public static function utilInstGet(str:String):Map<String,Dynamic>{
+		var ret:Map<String,Dynamic> = null;
+		var a:MusicBeatState =null;
+		var b:MusicBeatSubstate=null;
+		if(!isSubstate){
+			a = utilInstance;
+		}
+		else{
+			b = subInstance;
+		}
+
+		switch(str){
+			case       "variables": ret = (isSubstate&&b!=null)?b.variables:a.variables; 
+			case  "modchartTweens": ret = (isSubstate&&b!=null)?b.modchartTweens:a.modchartTweens; 
+			case "modchartSprites": ret = (isSubstate&&b!=null)?b.modchartSprites:a.modchartSprites; 
+			case  "modchartTimers": ret = (isSubstate&&b!=null)?b.modchartTimers:a.modchartTimers; 
+			case  "modchartSounds": ret = (isSubstate&&b!=null)?b.modchartSounds:a.modchartSounds; 
+			case   "modchartTexts": ret = (isSubstate&&b!=null)?b.modchartTexts:a.modchartTexts; 
+			case   "modchartSaves": ret = (isSubstate&&b!=null)?b.modchartSaves:a.modchartSaves; 
+		}
+		trace("Did it work? :"+ (ret!=null));
+		trace(ret);
+		return ret;
+	}
+
+	public static function getMembers():Array<flixel.FlxBasic>{
+		if(subInstance!=null){
+			return cast(subInstance,MusicBeatSubstate).members;
+		}
+		else{
+			return cast(utilInstance,MusicBeatState).members;
+		}
+	}
+
+	
+
+
+	public function new(inputInstance:Dynamic, ?isPlay:Bool = false, ?isSubs:Bool=false){
+		FunkinUtil.isSubstate = isSubs;
+		if(!isSubstate){
+			utilInstance = inputInstance;
+			if(isPlay){
+				playInstance = cast(inputInstance, PlayState);
+				isPlayState = isPlay;
 			}
-        }
-        catch(err){
-            dead = false;
-        }
-        return dead ? cast(GameOverSubstate.instance, FlxUIState) : utilInstance;
+			subInstance = null;
+		}
+		else{
+			subInstance = inputInstance;
+			//utilInstance = cast(subInstance,BeatStateInterface);
+		}
+	}
+
+    public static function getInstance():FlxState
+    {
+		if(!isSubstate){
+			var dead:Bool = false;
+			try{
+				var obj:Dynamic = Reflect.getProperty(utilInst(), "isDead");
+				if(obj != null){
+					dead = obj;
+				}
+			}
+			catch(err){
+				dead = false;
+			}
+			return dead ? cast(GameOverSubstate.instance, FlxState) : cast(utilInst(), FlxState);
+		}else{
+			return cast(utilInst(), FlxSubState);
+		}
     }
     
     public function funkyTrace(text:String, ignoreCheck:Bool = false, deprecated:Bool = false, color:FlxColor = FlxColor.WHITE) {
@@ -4190,7 +4251,7 @@ class FunkinUtil  {
 
     inline static function getTextObject(name:String):FlxText
     {
-        return utilInstance.modchartTexts.exists(name) ? utilInstance.modchartTexts.get(name) : Reflect.getProperty(PlayState.instance, name);
+        return utilInst().modchartTexts.exists(name) ? utilInst().modchartTexts.get(name) : Reflect.getProperty(PlayState.instance, name);
     }
 
     public function getShader(obj:String):FlxRuntimeShader
@@ -4213,7 +4274,7 @@ class FunkinUtil  {
     {
         if(!ClientPrefs.shaders) return false;
 
-        if(utilInstance.runtimeShaders.exists(name))
+        if(utilInst().runtimeShaders.exists(name))
         {
             funkyTrace('Shader $name was already initialized!');
             return true;
@@ -4249,7 +4310,7 @@ class FunkinUtil  {
 
                 if(found)
                 {
-                    utilInstance.runtimeShaders.set(name, [frag, vert]);
+                    utilInst().runtimeShaders.set(name, [frag, vert]);
                     //trace('Found shader $name!');
                     return true;
                 }
@@ -4313,38 +4374,46 @@ class FunkinUtil  {
 	}
 
 	function resetTextTag(tag:String) {
-		if(!utilInstance.modchartTexts.exists(tag)) {
+		if(!utilInst().modchartTexts.exists(tag)) {
 			return;
 		}
 
-		var pee:ModchartText = utilInstance.modchartTexts.get(tag);
+		var pee:ModchartText = utilInst().modchartTexts.get(tag);
 		pee.kill();
 		if(pee.wasAdded) {
-			utilInstance.remove(pee, true);
+			if(!isSubstate){
+				cast(utilInst(),MusicBeatState).remove(pee, true);
+			}else{
+				cast(utilInst(),MusicBeatSubstate).remove(pee, true);
+			}
 		}
 		pee.destroy();
-		utilInstance.modchartTexts.remove(tag);
+		utilInst().modchartTexts.remove(tag);
 	}
 
 	function resetSpriteTag(tag:String) {
-		if(!utilInstance.modchartSprites.exists(tag)) {
+		if(!utilInst().modchartSprites.exists(tag)) {
 			return;
 		}
 
-		var pee:ModchartSprite = utilInstance.modchartSprites.get(tag);
+		var pee:ModchartSprite = utilInst().modchartSprites.get(tag);
 		pee.kill();
 		if(pee.wasAdded) {
-			utilInstance.remove(pee, true);
+			if(!isSubstate){
+				cast(utilInst(),MusicBeatState).remove(pee, true);
+			}else{
+				cast(utilInst(),MusicBeatSubstate).remove(pee, true);
+			}
 		}
 		pee.destroy();
-		utilInstance.modchartSprites.remove(tag);
+		utilInst().modchartSprites.remove(tag);
 	}
 
 	function cancelTween(tag:String) {
-		if(utilInstance.modchartTweens.exists(tag)) {
-			utilInstance.modchartTweens.get(tag).cancel();
-			utilInstance.modchartTweens.get(tag).destroy();
-			utilInstance.modchartTweens.remove(tag);
+		if(utilInst().modchartTweens.exists(tag)) {
+			utilInst().modchartTweens.get(tag).cancel();
+			utilInst().modchartTweens.get(tag).destroy();
+			utilInst().modchartTweens.remove(tag);
 		}
 	}
 
@@ -4359,11 +4428,11 @@ class FunkinUtil  {
 	}
 
 	function cancelTimer(tag:String) {
-		if(utilInstance.modchartTimers.exists(tag)) {
-			var theTimer:FlxTimer = utilInstance.modchartTimers.get(tag);
+		if(utilInst().modchartTimers.exists(tag)) {
+			var theTimer:FlxTimer = utilInst().modchartTimers.get(tag);
 			theTimer.cancel();
 			theTimer.destroy();
-			utilInstance.modchartTimers.remove(tag);
+			utilInst().modchartTimers.remove(tag);
 		}
 	}
 
@@ -4439,7 +4508,7 @@ class FunkinUtil  {
 			return playInstance.camGame;
 		}
 		else{
-			return utilInstance.camGame;
+			return utilInst().camGame;
 		}
 	}
 
@@ -4451,8 +4520,8 @@ class FunkinUtil  {
             die.push(Std.parseInt(strIndices[i]));
         }
 
-        if(utilInstance.getLuaObject(obj, false)!=null) {
-            var pussy:FlxSprite = utilInstance.getLuaObject(obj, false);
+        if(utilInst().getLuaObject(obj, false)!=null) {
+            var pussy:FlxSprite = utilInst().getLuaObject(obj, false);
             pussy.animation.addByIndices(name, prefix, die, '', framerate, loop);
             if(pussy.animation.curAnim == null) {
                 pussy.animation.play(name, true);
@@ -4485,7 +4554,7 @@ class FunkinUtil  {
 
     public static function getObjectDirectly(objectName:String, ?checkForTextsToo:Bool = true):Dynamic
     {
-        var coverMeInPiss:Dynamic = utilInstance.getLuaObject(objectName, checkForTextsToo);
+        var coverMeInPiss:Dynamic = utilInst().getLuaObject(objectName, checkForTextsToo);
         if(coverMeInPiss==null)
             coverMeInPiss = getVarInArray(getInstance(), objectName);
 
@@ -4551,11 +4620,11 @@ class FunkinUtil  {
     set('gfSection', false);
 
     // Gameplay settings
-    set('healthGainMult', utilInstance.healthGain);
-    set('healthLossMult', utilInstance.healthLoss);
-    set('instakillOnMiss', utilInstance.instakillOnMiss);
-    set('botPlay', utilInstance.cpuControlled);
-    set('practice', utilInstance.practiceMode);
+    set('healthGainMult', utilInst().healthGain);
+    set('healthLossMult', utilInst().healthLoss);
+    set('instakillOnMiss', utilInst().instakillOnMiss);
+    set('botPlay', utilInst().cpuControlled);
+    set('practice', utilInst().practiceMode);
 
     for (i in 0...4) {
         set('defaultPlayerStrumX' + i, 0);
@@ -4565,12 +4634,12 @@ class FunkinUtil  {
     }
 
     // Default character positions woooo
-    set('defaultBoyfriendX', utilInstance.BF_X);
-    set('defaultBoyfriendY', utilInstance.BF_Y);
-    set('defaultOpponentX', utilInstance.DAD_X);
-    set('defaultOpponentY', utilInstance.DAD_Y);
-    set('defaultGirlfriendX', utilInstance.GF_X);
-    set('defaultGirlfriendY', utilInstance.GF_Y);
+    set('defaultBoyfriendX', utilInst().BF_X);
+    set('defaultBoyfriendY', utilInst().BF_Y);
+    set('defaultOpponentX', utilInst().DAD_X);
+    set('defaultOpponentY', utilInst().DAD_Y);
+    set('defaultGirlfriendX', utilInst().GF_X);
+    set('defaultGirlfriendY', utilInst().GF_Y);
 
     // Character shit
     set('boyfriendName', PlayState.SONG.player1);
@@ -4628,7 +4697,7 @@ class FunkinUtil  {
         if(!ClientPrefs.shaders) return false;
 
         #if (!flash && MODS_ALLOWED && sys)
-        if(!utilInstance.runtimeShaders.exists(shader) && !initLuaShaderHelper(shader))
+        if(!utilInst().runtimeShaders.exists(shader) && !initLuaShaderHelper(shader))
         {
             funkyTrace('Shader $shader is missing!', false, false, FlxColor.RED);
             return false;
@@ -4641,7 +4710,7 @@ class FunkinUtil  {
         }
 
         if(leObj != null) {
-            var arr:Array<String> = utilInstance.runtimeShaders.get(shader);
+            var arr:Array<String> = utilInst().runtimeShaders.get(shader);
             leObj.shader = new FlxRuntimeShader(arr[0], arr[1]);
             return true;
         }
@@ -4919,10 +4988,10 @@ class FunkinUtil  {
     public function doTweenX(tag:String, vars:String, value:Dynamic, duration:Float, ease:String) {
         var penisExam:Dynamic = tweenShit(tag, vars);
         if(penisExam != null) {
-            utilInstance.modchartTweens.set(tag, FlxTween.tween(penisExam, {x: value}, duration, {ease: getFlxEaseByString(ease),
+            utilInst().modchartTweens.set(tag, FlxTween.tween(penisExam, {x: value}, duration, {ease: getFlxEaseByString(ease),
                 onComplete: function(twn:FlxTween) {
-                    utilInstance.callOnLuas('onTweenCompleted', [tag]);
-                    utilInstance.modchartTweens.remove(tag);
+                    utilInst().callOnLuas('onTweenCompleted', [tag]);
+                    utilInst().modchartTweens.remove(tag);
                 }
             }));
         } else {
@@ -4932,10 +5001,10 @@ class FunkinUtil  {
     public function doTweenY(tag:String, vars:String, value:Dynamic, duration:Float, ease:String) {
         var penisExam:Dynamic = tweenShit(tag, vars);
         if(penisExam != null) {
-            utilInstance.modchartTweens.set(tag, FlxTween.tween(penisExam, {y: value}, duration, {ease: getFlxEaseByString(ease),
+            utilInst().modchartTweens.set(tag, FlxTween.tween(penisExam, {y: value}, duration, {ease: getFlxEaseByString(ease),
                 onComplete: function(twn:FlxTween) {
-                    utilInstance.callOnLuas('onTweenCompleted', [tag]);
-                    utilInstance.modchartTweens.remove(tag);
+                    utilInst().callOnLuas('onTweenCompleted', [tag]);
+                    utilInst().modchartTweens.remove(tag);
                 }
             }));
         } else {
@@ -4945,10 +5014,10 @@ class FunkinUtil  {
     public function doTweenAngle(tag:String, vars:String, value:Dynamic, duration:Float, ease:String) {
         var penisExam:Dynamic = tweenShit(tag, vars);
         if(penisExam != null) {
-            utilInstance.modchartTweens.set(tag, FlxTween.tween(penisExam, {angle: value}, duration, {ease: getFlxEaseByString(ease),
+            utilInst().modchartTweens.set(tag, FlxTween.tween(penisExam, {angle: value}, duration, {ease: getFlxEaseByString(ease),
                 onComplete: function(twn:FlxTween) {
-                    utilInstance.callOnLuas('onTweenCompleted', [tag]);
-                    utilInstance.modchartTweens.remove(tag);
+                    utilInst().callOnLuas('onTweenCompleted', [tag]);
+                    utilInst().modchartTweens.remove(tag);
                 }
             }));
         } else {
@@ -4958,10 +5027,10 @@ class FunkinUtil  {
     public function doTweenAlpha(tag:String, vars:String, value:Dynamic, duration:Float, ease:String) {
         var penisExam:Dynamic = tweenShit(tag, vars);
         if(penisExam != null) {
-            utilInstance.modchartTweens.set(tag, FlxTween.tween(penisExam, {alpha: value}, duration, {ease: getFlxEaseByString(ease),
+            utilInst().modchartTweens.set(tag, FlxTween.tween(penisExam, {alpha: value}, duration, {ease: getFlxEaseByString(ease),
                 onComplete: function(twn:FlxTween) {
-                    utilInstance.callOnLuas('onTweenCompleted', [tag]);
-                    utilInstance.modchartTweens.remove(tag);
+                    utilInst().callOnLuas('onTweenCompleted', [tag]);
+                    utilInst().modchartTweens.remove(tag);
                 }
             }));
         } else {
@@ -4971,10 +5040,10 @@ class FunkinUtil  {
     public function doTweenZoom(tag:String, vars:String, value:Dynamic, duration:Float, ease:String) {
         var penisExam:Dynamic = tweenShit(tag, vars);
         if(penisExam != null) {
-            utilInstance.modchartTweens.set(tag, FlxTween.tween(penisExam, {zoom: value}, duration, {ease: getFlxEaseByString(ease),
+            utilInst().modchartTweens.set(tag, FlxTween.tween(penisExam, {zoom: value}, duration, {ease: getFlxEaseByString(ease),
                 onComplete: function(twn:FlxTween) {
-                    utilInstance.callOnLuas('onTweenCompleted', [tag]);
-                    utilInstance.modchartTweens.remove(tag);
+                    utilInst().callOnLuas('onTweenCompleted', [tag]);
+                    utilInst().modchartTweens.remove(tag);
                 }
             }));
         } else {
@@ -4989,10 +5058,10 @@ class FunkinUtil  {
 
             var curColor:FlxColor = penisExam.color;
             curColor.alphaFloat = penisExam.alpha;
-            utilInstance.modchartTweens.set(tag, FlxTween.color(penisExam, duration, curColor, color, {ease: getFlxEaseByString(ease),
+            utilInst().modchartTweens.set(tag, FlxTween.color(penisExam, duration, curColor, color, {ease: getFlxEaseByString(ease),
                 onComplete: function(twn:FlxTween) {
-                    utilInstance.modchartTweens.remove(tag);
-                    utilInstance.callOnLuas('onTweenCompleted', [tag]);
+                    utilInst().modchartTweens.remove(tag);
+                    utilInst().callOnLuas('onTweenCompleted', [tag]);
                 }
             }));
         } else {
@@ -5113,9 +5182,9 @@ class FunkinUtil  {
 
     public function runTimer(tag:String, time:Float = 1, loops:Int = 1) {
         cancelTimer(tag);
-        utilInstance.modchartTimers.set(tag, new FlxTimer().start(time, function(tmr:FlxTimer) {
+        utilInst().modchartTimers.set(tag, new FlxTimer().start(time, function(tmr:FlxTimer) {
             if(tmr.finished) {
-                utilInstance.modchartTimers.remove(tag);
+                utilInst().modchartTimers.remove(tag);
             }
             utilInstance.callOnLuas('onTimerCompleted', [tag, tmr.loops, tmr.loopsLeft]);
             //trace('Timer Completed: ' + tag);
@@ -5292,14 +5361,14 @@ class FunkinUtil  {
     public function keyJustPressed(name:String) {
         var key:Bool = false;
         switch(name) {
-            case 'left': key = utilInstance.getControl('NOTE_LEFT_P');
-            case 'down': key = utilInstance.getControl('NOTE_DOWN_P');
-            case 'up': key = utilInstance.getControl('NOTE_UP_P');
-            case 'right': key = utilInstance.getControl('NOTE_RIGHT_P');
-            case 'accept': key = utilInstance.getControl('ACCEPT');
-            case 'back': key = utilInstance.getControl('BACK');
-            case 'pause': key = utilInstance.getControl('PAUSE');
-            case 'reset': key = utilInstance.getControl('RESET');
+            case 'left': key = utilInst().getControl('NOTE_LEFT_P');
+            case 'down': key = utilInst().getControl('NOTE_DOWN_P');
+            case 'up': key = utilInst().getControl('NOTE_UP_P');
+            case 'right': key = utilInst().getControl('NOTE_RIGHT_P');
+            case 'accept': key = utilInst().getControl('ACCEPT');
+            case 'back': key = utilInst().getControl('BACK');
+            case 'pause': key = utilInst().getControl('PAUSE');
+            case 'reset': key = utilInst().getControl('RESET');
             case 'space': key = FlxG.keys.justPressed.SPACE;//an extra key for convinience
         }
         return key;
@@ -5307,10 +5376,10 @@ class FunkinUtil  {
     public function keyPressed(name:String) {
         var key:Bool = false;
         switch(name) {
-            case 'left': key = utilInstance.getControl('NOTE_LEFT');
-            case 'down': key = utilInstance.getControl('NOTE_DOWN');
-            case 'up': key = utilInstance.getControl('NOTE_UP');
-            case 'right': key = utilInstance.getControl('NOTE_RIGHT');
+            case 'left': key = utilInst().getControl('NOTE_LEFT');
+            case 'down': key = utilInst().getControl('NOTE_DOWN');
+            case 'up': key = utilInst().getControl('NOTE_UP');
+            case 'right': key = utilInst().getControl('NOTE_RIGHT');
             case 'space': key = FlxG.keys.pressed.SPACE;//an extra key for convinience
         }
         return key;
@@ -5318,10 +5387,10 @@ class FunkinUtil  {
     public function keyReleased(name:String) {
         var key:Bool = false;
         switch(name) {
-            case 'left': key = utilInstance.getControl('NOTE_LEFT_R');
-            case 'down': key = utilInstance.getControl('NOTE_DOWN_R');
-            case 'up': key = utilInstance.getControl('NOTE_UP_R');
-            case 'right': key = utilInstance.getControl('NOTE_RIGHT_R');
+            case 'left': key = utilInst().getControl('NOTE_LEFT_R');
+            case 'down': key = utilInst().getControl('NOTE_DOWN_R');
+            case 'up': key = utilInst().getControl('NOTE_UP_R');
+            case 'right': key = utilInst().getControl('NOTE_RIGHT_R');
             case 'space': key = FlxG.keys.justReleased.SPACE;//an extra key for convinience
         }
         return key;
@@ -5365,7 +5434,7 @@ class FunkinUtil  {
         return true;
     }
     public function restartSong(?skipTransition:Bool = false) {
-        utilInstance.persistentUpdate = false;
+        utilInst().persistentUpdate = false;
         PauseSubState.restartSong(skipTransition);
         return true;
     }
@@ -5556,7 +5625,7 @@ class FunkinUtil  {
             leSprite.loadGraphic(Paths.image(image));
         }
         leSprite.antialiasing = ClientPrefs.globalAntialiasing;
-        utilInstance.modchartSprites.set(tag, leSprite);
+        utilInst().modchartSprites.set(tag, leSprite);
         leSprite.active = true;
     }
     public function makeAnimatedLuaSprite(tag:String, image:String, x:Float, y:Float, ?spriteType:String = "sparrow") {
@@ -5566,16 +5635,16 @@ class FunkinUtil  {
 
         loadFramesHelper(leSprite, image, spriteType);
         leSprite.antialiasing = ClientPrefs.globalAntialiasing;
-        utilInstance.modchartSprites.set(tag, leSprite);
+        utilInst().modchartSprites.set(tag, leSprite);
     }
 
     public function makeGraphic(obj:String, width:Int, height:Int, color:String) {
         var colorNum:Int = Std.parseInt(color);
         if(!color.startsWith('0x')) colorNum = Std.parseInt('0xff' + color);
 
-        var spr:FlxSprite = utilInstance.getLuaObject(obj,false);
+        var spr:FlxSprite = utilInst().getLuaObject(obj,false);
         if(spr!=null) {
-            utilInstance.getLuaObject(obj,false).makeGraphic(width, height, colorNum);
+            utilInst().getLuaObject(obj,false).makeGraphic(width, height, colorNum);
             return;
         }
 
@@ -5585,8 +5654,8 @@ class FunkinUtil  {
         }
     }
     public function addAnimationByPrefix(obj:String, name:String, prefix:String, framerate:Int = 24, loop:Bool = true) {
-        if(utilInstance.getLuaObject(obj,false)!=null) {
-            var cock:FlxSprite = utilInstance.getLuaObject(obj,false);
+        if(utilInst().getLuaObject(obj,false)!=null) {
+            var cock:FlxSprite = utilInst().getLuaObject(obj,false);
             cock.animation.addByPrefix(name, prefix, framerate, loop);
             if(cock.animation.curAnim == null) {
                 cock.animation.play(name, true);
@@ -5604,8 +5673,8 @@ class FunkinUtil  {
     }
 
     public function addAnimation(obj:String, name:String, frames:Array<Int>, framerate:Int = 24, loop:Bool = true) {
-        if(utilInstance.getLuaObject(obj,false)!=null) {
-            var cock:FlxSprite = utilInstance.getLuaObject(obj,false);
+        if(utilInst().getLuaObject(obj,false)!=null) {
+            var cock:FlxSprite = utilInst().getLuaObject(obj,false);
             cock.animation.add(name, frames, framerate, loop);
             if(cock.animation.curAnim == null) {
                 cock.animation.play(name, true);
@@ -5632,8 +5701,8 @@ class FunkinUtil  {
 
     public function playAnim(obj:String, name:String, forced:Bool = false, ?reverse:Bool = false, ?startFrame:Int = 0)
     {
-        if(utilInstance.getLuaObject(obj, false) != null) {
-            var luaObj:FlxSprite = utilInstance.getLuaObject(obj,false);
+        if(utilInst().getLuaObject(obj, false) != null) {
+            var luaObj:FlxSprite = utilInst().getLuaObject(obj,false);
             if(luaObj.animation.getByName(name) != null)
             {
                 luaObj.animation.play(name, forced, reverse, startFrame);
@@ -5674,8 +5743,8 @@ class FunkinUtil  {
         return false;
     }
     public function addOffset(obj:String, anim:String, x:Float, y:Float) {
-        if(utilInstance.modchartSprites.exists(obj)) {
-            utilInstance.modchartSprites.get(obj).animOffsets.set(anim, [x, y]);
+        if(utilInst().modchartSprites.exists(obj)) {
+            utilInst().modchartSprites.get(obj).animOffsets.set(anim, [x, y]);
             return true;
         }
 
@@ -5688,8 +5757,8 @@ class FunkinUtil  {
     }
 
     public function setScrollFactor(obj:String, scrollX:Float, scrollY:Float) {
-        if(utilInstance.getLuaObject(obj,false)!=null) {
-            utilInstance.getLuaObject(obj,false).scrollFactor.set(scrollX, scrollY);
+        if(utilInst().getLuaObject(obj,false)!=null) {
+            utilInst().getLuaObject(obj,false).scrollFactor.set(scrollX, scrollY);
             return;
         }
 
@@ -5699,8 +5768,8 @@ class FunkinUtil  {
         }
     }
     public function addLuaSprite(tag:String, front:Bool = true) {
-        if(utilInstance.modchartSprites.exists(tag)) {
-            var shit:ModchartSprite = utilInstance.modchartSprites.get(tag);
+        if(utilInst().modchartSprites.exists(tag)) {
+            var shit:ModchartSprite = utilInst().modchartSprites.get(tag);
             if(!shit.wasAdded) {
                 if(!isPlayState || front )
                 {
@@ -5715,9 +5784,9 @@ class FunkinUtil  {
                     else
                     {
                         var position:Int = playInstance.members.indexOf(playInstance.gfGroup);
-                        if(utilInstance.members.indexOf(playInstance.boyfriendGroup) < position) {
+                        if(getMembers().indexOf(playInstance.boyfriendGroup) < position) {
                             position = playInstance.members.indexOf(playInstance.boyfriendGroup);
-                        } else if(utilInstance.members.indexOf(playInstance.dadGroup) < position) {
+                        } else if(getMembers().indexOf(playInstance.dadGroup) < position) {
                             position = playInstance.members.indexOf(playInstance.dadGroup);
                         }
                         playInstance.insert(position, shit);
@@ -5729,8 +5798,8 @@ class FunkinUtil  {
         }
     }
     public function setGraphicSize(obj:String, x:Int, y:Int = 0, updateHitbox:Bool = true) {
-        if(utilInstance.getLuaObject(obj)!=null) {
-            var shit:FlxSprite = utilInstance.getLuaObject(obj);
+        if(utilInst().getLuaObject(obj)!=null) {
+            var shit:FlxSprite = utilInst().getLuaObject(obj);
             shit.setGraphicSize(x, y);
             if(updateHitbox) shit.updateHitbox();
             return;
@@ -5750,8 +5819,8 @@ class FunkinUtil  {
         funkyTrace('Couldnt find object: ' + obj, false, false, FlxColor.RED);
     }
     public function scaleObject(obj:String, x:Float, y:Float, updateHitbox:Bool = true) {
-        if(utilInstance.getLuaObject(obj)!=null) {
-            var shit:FlxSprite = utilInstance.getLuaObject(obj);
+        if(utilInst().getLuaObject(obj)!=null) {
+            var shit:FlxSprite = utilInst().getLuaObject(obj);
             shit.scale.set(x, y);
             if(updateHitbox) shit.updateHitbox();
             return;
@@ -5771,8 +5840,8 @@ class FunkinUtil  {
         funkyTrace('Couldnt find object: ' + obj, false, false, FlxColor.RED);
     }
     public function updateHitbox(obj:String) {
-        if(utilInstance.getLuaObject(obj)!=null) {
-            var shit:FlxSprite = utilInstance.getLuaObject(obj);
+        if(utilInst().getLuaObject(obj)!=null) {
+            var shit:FlxSprite = utilInst().getLuaObject(obj);
             shit.updateHitbox();
             return;
         }
@@ -5793,8 +5862,8 @@ class FunkinUtil  {
     }
 
     public function isNoteChild(parentID:Int, childID:Int){
-        var parent: Note = cast utilInstance.getLuaObject('note${parentID}',false);
-        var child: Note = cast utilInstance.getLuaObject('note${childID}',false);
+        var parent: Note = cast utilInst().getLuaObject('note${parentID}',false);
+        var child: Note = cast utilInst().getLuaObject('note${childID}',false);
         if(parent!=null && child!=null)
             return parent.tail.contains(child);
 
@@ -5803,11 +5872,11 @@ class FunkinUtil  {
     }
 
     public function removeLuaSprite(tag:String, destroy:Bool = true) {
-        if(!utilInstance.modchartSprites.exists(tag)) {
+        if(!utilInst().modchartSprites.exists(tag)) {
             return;
         }
 
-        var pee:ModchartSprite = utilInstance.modchartSprites.get(tag);
+        var pee:ModchartSprite = utilInst().modchartSprites.get(tag);
         if(destroy) {
             pee.kill();
         }
@@ -5819,18 +5888,18 @@ class FunkinUtil  {
 
         if(destroy) {
             pee.destroy();
-            utilInstance.modchartSprites.remove(tag);
+            utilInst().modchartSprites.remove(tag);
         }
     }
 
     public function luaSpriteExists(tag:String) {
-        return utilInstance.modchartSprites.exists(tag);
+        return utilInst().modchartSprites.exists(tag);
     }
     public function luaTextExists(tag:String) {
-        return utilInstance.modchartTexts.exists(tag);
+        return utilInst().modchartTexts.exists(tag);
     }
     public function luaSoundExists(tag:String) {
-        return utilInstance.modchartSounds.exists(tag);
+        return utilInst().modchartSounds.exists(tag);
     }
 
     public function setHealthBarColors(leftHex:String, rightHex:String) {
@@ -5855,15 +5924,15 @@ class FunkinUtil  {
     }
 
     public function setObjectCamera(obj:String, camera:String = '') {
-        /*if(utilInstance.modchartSprites.exists(obj)) {
-            utilInstance.modchartSprites.get(obj).cameras = [cameraFromString(camera)];
+        /*if(utilInst().modchartSprites.exists(obj)) {
+            utilInst().modchartSprites.get(obj).cameras = [cameraFromString(camera)];
             return true;
         }
-        else if(utilInstance.modchartTexts.exists(obj)) {
-            utilInstance.modchartTexts.get(obj).cameras = [cameraFromString(camera)];
+        else if(utilInst().modchartTexts.exists(obj)) {
+            utilInst().modchartTexts.get(obj).cameras = [cameraFromString(camera)];
             return true;
         }*/
-        var real = utilInstance.getLuaObject(obj);
+        var real = utilInst().getLuaObject(obj);
         if(real!=null){
             real.cameras = [cameraFromString(camera)];
             return true;
@@ -5883,7 +5952,7 @@ class FunkinUtil  {
         return false;
     }
     public function setBlendMode(obj:String, blend:String = '') {
-        var real = utilInstance.getLuaObject(obj);
+        var real = utilInst().getLuaObject(obj);
         if(real!=null) {
             real.blend = blendModeFromString(blend);
             return true;
@@ -5903,7 +5972,7 @@ class FunkinUtil  {
         return false;
     }
     public function screenCenter(obj:String, pos:String = 'xy') {
-        var spr:FlxSprite = utilInstance.getLuaObject(obj);
+        var spr:FlxSprite = utilInst().getLuaObject(obj);
 
         if(spr==null){
             var killMe:Array<String> = obj.split('.');
@@ -5935,7 +6004,7 @@ class FunkinUtil  {
         var objectsArray:Array<FlxSprite> = [];
         for (i in 0...namesArray.length)
         {
-            var real = utilInstance.getLuaObject(namesArray[i]);
+            var real = utilInst().getLuaObject(namesArray[i]);
             if(real!=null) {
                 objectsArray.push(real);
             } else {
@@ -6022,7 +6091,12 @@ class FunkinUtil  {
     public function startVideo(videoFile:String) {
         #if VIDEOS_ALLOWED
         if(FileSystem.exists(Paths.video(videoFile))) {
-            utilInstance.startVideo(videoFile);
+            if(!isSubstate){
+				cast(utilInst(),MusicBeatState).startVideo(videoFile);
+			}
+			else{
+				//W: IGNORED, FOR NOW 
+			}
             return true;
         } else {
             funkyTrace('Video file not found: ' + videoFile, false, false, FlxColor.RED);
@@ -6032,10 +6106,10 @@ class FunkinUtil  {
         #else
 		/*
         if(!isPlayState) return true;
-		if(utilInstance.endingSong) {
-            utilInstance.endSong();
+		if(utilInst().endingSong) {
+            utilInst().endSong();
         } else {
-            utilInstance.startCountdown();
+            utilInst().startCountdown();
         }
         return true;*/
 		return false;
@@ -6048,46 +6122,46 @@ class FunkinUtil  {
     public function playSound(sound:String, volume:Float = 1, ?tag:String = null) {
         if(tag != null && tag.length > 0) {
             tag = tag.replace('.', '');
-            if(utilInstance.modchartSounds.exists(tag)) {
-                utilInstance.modchartSounds.get(tag).stop();
+            if(utilInst().modchartSounds.exists(tag)) {
+                utilInst().modchartSounds.get(tag).stop();
             }
-            utilInstance.modchartSounds.set(tag, FlxG.sound.play(Paths.sound(sound), volume, false, function() {
-                utilInstance.modchartSounds.remove(tag);
-                utilInstance.callOnLuas('onSoundFinished', [tag]);
+            utilInst().modchartSounds.set(tag, FlxG.sound.play(Paths.sound(sound), volume, false, function() {
+                utilInst().modchartSounds.remove(tag);
+                utilInst().callOnLuas('onSoundFinished', [tag]);
             }));
             return;
         }
         FlxG.sound.play(Paths.sound(sound), volume);
     }
     public function stopSound(tag:String) {
-        if(tag != null && tag.length > 1 && utilInstance.modchartSounds.exists(tag)) {
-            utilInstance.modchartSounds.get(tag).stop();
-            utilInstance.modchartSounds.remove(tag);
+        if(tag != null && tag.length > 1 && utilInst().modchartSounds.exists(tag)) {
+            utilInst().modchartSounds.get(tag).stop();
+            utilInst().modchartSounds.remove(tag);
         }
     }
     public function pauseSound(tag:String) {
-        if(tag != null && tag.length > 1 && utilInstance.modchartSounds.exists(tag)) {
-            utilInstance.modchartSounds.get(tag).pause();
+        if(tag != null && tag.length > 1 && utilInst().modchartSounds.exists(tag)) {
+            utilInst().modchartSounds.get(tag).pause();
         }
     }
     public function resumeSound(tag:String) {
-        if(tag != null && tag.length > 1 && utilInstance.modchartSounds.exists(tag)) {
-            utilInstance.modchartSounds.get(tag).play();
+        if(tag != null && tag.length > 1 && utilInst().modchartSounds.exists(tag)) {
+            utilInst().modchartSounds.get(tag).play();
         }
     }
     public function soundFadeIn(tag:String, duration:Float, fromValue:Float = 0, toValue:Float = 1) {
         if(tag == null || tag.length < 1) {
             FlxG.sound.music.fadeIn(duration, fromValue, toValue);
-        } else if(utilInstance.modchartSounds.exists(tag)) {
-            utilInstance.modchartSounds.get(tag).fadeIn(duration, fromValue, toValue);
+        } else if(utilInst().modchartSounds.exists(tag)) {
+            utilInst().modchartSounds.get(tag).fadeIn(duration, fromValue, toValue);
         }
 
     }
     public function soundFadeOut(tag:String, duration:Float, toValue:Float = 0) {
         if(tag == null || tag.length < 1) {
             FlxG.sound.music.fadeOut(duration, toValue);
-        } else if(utilInstance.modchartSounds.exists(tag)) {
-            utilInstance.modchartSounds.get(tag).fadeOut(duration, toValue);
+        } else if(utilInst().modchartSounds.exists(tag)) {
+            utilInst().modchartSounds.get(tag).fadeOut(duration, toValue);
         }
     }
     public function soundFadeCancel(tag:String) {
@@ -6095,11 +6169,11 @@ class FunkinUtil  {
             if(FlxG.sound.music.fadeTween != null) {
                 FlxG.sound.music.fadeTween.cancel();
             }
-        } else if(utilInstance.modchartSounds.exists(tag)) {
-            var theSound:FlxSound = utilInstance.modchartSounds.get(tag);
+        } else if(utilInst().modchartSounds.exists(tag)) {
+            var theSound:FlxSound = utilInst().modchartSounds.get(tag);
             if(theSound.fadeTween != null) {
                 theSound.fadeTween.cancel();
-                utilInstance.modchartSounds.remove(tag);
+                utilInst().modchartSounds.remove(tag);
             }
         }
     }
@@ -6108,8 +6182,8 @@ class FunkinUtil  {
             if(FlxG.sound.music != null) {
                 return FlxG.sound.music.volume;
             }
-        } else if(utilInstance.modchartSounds.exists(tag)) {
-            return utilInstance.modchartSounds.get(tag).volume;
+        } else if(utilInst().modchartSounds.exists(tag)) {
+            return utilInst().modchartSounds.get(tag).volume;
         }
         return 0;
     }
@@ -6118,19 +6192,19 @@ class FunkinUtil  {
             if(FlxG.sound.music != null) {
                 FlxG.sound.music.volume = value;
             }
-        } else if(utilInstance.modchartSounds.exists(tag)) {
-            utilInstance.modchartSounds.get(tag).volume = value;
+        } else if(utilInst().modchartSounds.exists(tag)) {
+            utilInst().modchartSounds.get(tag).volume = value;
         }
     }
     public function getSoundTime(tag:String) {
-        if(tag != null && tag.length > 0 && utilInstance.modchartSounds.exists(tag)) {
-            return utilInstance.modchartSounds.get(tag).time;
+        if(tag != null && tag.length > 0 && utilInst().modchartSounds.exists(tag)) {
+            return utilInst().modchartSounds.get(tag).time;
         }
         return 0;
     }
     public function setSoundTime(tag:String, value:Float) {
-        if(tag != null && tag.length > 0 && utilInstance.modchartSounds.exists(tag)) {
-            var theSound:FlxSound = utilInstance.modchartSounds.get(tag);
+        if(tag != null && tag.length > 0 && utilInst().modchartSounds.exists(tag)) {
+            var theSound:FlxSound = utilInst().modchartSounds.get(tag);
             if(theSound != null) {
                 var wasResumed:Bool = theSound.playing;
                 theSound.pause();
@@ -6162,7 +6236,7 @@ class FunkinUtil  {
         tag = tag.replace('.', '');
         resetTextTag(tag);
         var leText:ModchartText = new ModchartText(x, y, text, width);
-        utilInstance.modchartTexts.set(tag, leText);
+        utilInst().modchartTexts.set(tag, leText);
     }
 
     public function setTextString(tag:String, text:String) {
@@ -6270,8 +6344,8 @@ class FunkinUtil  {
     }
 
     public function addLuaText(tag:String) {
-        if(utilInstance.modchartTexts.exists(tag)) {
-            var shit:ModchartText = utilInstance.modchartTexts.get(tag);
+        if(utilInst().modchartTexts.exists(tag)) {
+            var shit:ModchartText = utilInst().modchartTexts.get(tag);
             if(!shit.wasAdded) {
                 getInstance().add(shit);
                 shit.wasAdded = true;
@@ -6280,11 +6354,11 @@ class FunkinUtil  {
         }
     }
     public function removeLuaText(tag:String, destroy:Bool = true) {
-        if(!utilInstance.modchartTexts.exists(tag)) {
+        if(!utilInst().modchartTexts.exists(tag)) {
             return;
         }
 
-        var pee:ModchartText = utilInstance.modchartTexts.get(tag);
+        var pee:ModchartText = utilInst().modchartTexts.get(tag);
         if(destroy) {
             pee.kill();
         }
@@ -6296,41 +6370,41 @@ class FunkinUtil  {
 
         if(destroy) {
             pee.destroy();
-            utilInstance.modchartTexts.remove(tag);
+            utilInst().modchartTexts.remove(tag);
         }
     }
 
     public function initSaveData(name:String, ?folder:String = 'psychenginemods') {
-        if(!utilInstance.modchartSaves.exists(name))
+        if(!utilInst().modchartSaves.exists(name))
         {
             var save:FlxSave = new FlxSave();
             save.bind(name, folder);
-            utilInstance.modchartSaves.set(name, save);
+            utilInst().modchartSaves.set(name, save);
             return;
         }
         funkyTrace('Save file already initialized: ' + name);
     }
     public function flushSaveData(name:String) {
-        if(utilInstance.modchartSaves.exists(name))
+        if(utilInst().modchartSaves.exists(name))
         {
-            utilInstance.modchartSaves.get(name).flush();
+            utilInst().modchartSaves.get(name).flush();
             return;
         }
         funkyTrace('Save file not initialized: ' + name, false, false, FlxColor.RED);
     }
     public function getDataFromSave(name:String, field:String, ?defaultValue:Dynamic = null) {
-        if(utilInstance.modchartSaves.exists(name))
+        if(utilInst().modchartSaves.exists(name))
         {
-            var retVal:Dynamic = Reflect.field(utilInstance.modchartSaves.get(name).data, field);
+            var retVal:Dynamic = Reflect.field(utilInst().modchartSaves.get(name).data, field);
             return retVal;
         }
         funkyTrace('Save file not initialized: ' + name, false, false, FlxColor.RED);
         return defaultValue;
     }
     public function setDataFromSave(name:String, field:String, value:Dynamic) {
-        if(utilInstance.modchartSaves.exists(name))
+        if(utilInst().modchartSaves.exists(name))
         {
-            Reflect.setField(utilInstance.modchartSaves.get(name).data, field, value);
+            Reflect.setField(utilInst().modchartSaves.get(name).data, field, value);
             return;
         }
         funkyTrace('Save file not initialized: ' + name, false, false, FlxColor.RED);
@@ -6404,8 +6478,8 @@ class FunkinUtil  {
     // DEPRECATED, DONT MESS WITH THESE SHITS, ITS JUST THERE FOR BACKWARD COMPATIBILITY
     public function objectPlayAnimation(obj:String, name:String, forced:Bool = false, ?startFrame:Int = 0) {
         funkyTrace("objectPlayAnimation is deprecated! Use playAnim instead", false, true);
-        if(utilInstance.getLuaObject(obj,false) != null) {
-            utilInstance.getLuaObject(obj,false).animation.play(name, forced, false, startFrame);
+        if(utilInst().getLuaObject(obj,false) != null) {
+            utilInst().getLuaObject(obj,false).animation.play(name, forced, false, startFrame);
             return true;
         }
 
@@ -6433,17 +6507,17 @@ class FunkinUtil  {
     }
     public function luaSpriteMakeGraphic(tag:String, width:Int, height:Int, color:String) {
         funkyTrace("luaSpriteMakeGraphic is deprecated! Use makeGraphic instead", false, true);
-        if(utilInstance.modchartSprites.exists(tag)) {
+        if(utilInst().modchartSprites.exists(tag)) {
             var colorNum:Int = Std.parseInt(color);
             if(!color.startsWith('0x')) colorNum = Std.parseInt('0xff' + color);
 
-            utilInstance.modchartSprites.get(tag).makeGraphic(width, height, colorNum);
+            utilInst().modchartSprites.get(tag).makeGraphic(width, height, colorNum);
         }
     }
     public function luaSpriteAddAnimationByPrefix(tag:String, name:String, prefix:String, framerate:Int = 24, loop:Bool = true) {
         funkyTrace("luaSpriteAddAnimationByPrefix is deprecated! Use addAnimationByPrefix instead", false, true);
-        if(utilInstance.modchartSprites.exists(tag)) {
-            var cock:ModchartSprite = utilInstance.modchartSprites.get(tag);
+        if(utilInst().modchartSprites.exists(tag)) {
+            var cock:ModchartSprite = utilInst().modchartSprites.get(tag);
             cock.animation.addByPrefix(name, prefix, framerate, loop);
             if(cock.animation.curAnim == null) {
                 cock.animation.play(name, true);
@@ -6452,13 +6526,13 @@ class FunkinUtil  {
     }
     public function luaSpriteAddAnimationByIndices(tag:String, name:String, prefix:String, indices:String, framerate:Int = 24) {
         funkyTrace("luaSpriteAddAnimationByIndices is deprecated! Use addAnimationByIndices instead", false, true);
-        if(utilInstance.modchartSprites.exists(tag)) {
+        if(utilInst().modchartSprites.exists(tag)) {
             var strIndices:Array<String> = indices.trim().split(',');
             var die:Array<Int> = [];
             for (i in 0...strIndices.length) {
                 die.push(Std.parseInt(strIndices[i]));
             }
-            var pussy:ModchartSprite = utilInstance.modchartSprites.get(tag);
+            var pussy:ModchartSprite = utilInst().modchartSprites.get(tag);
             pussy.animation.addByIndices(name, prefix, die, '', framerate, false);
             if(pussy.animation.curAnim == null) {
                 pussy.animation.play(name, true);
@@ -6467,14 +6541,14 @@ class FunkinUtil  {
     }
     public function luaSpritePlayAnimation(tag:String, name:String, forced:Bool = false) {
         funkyTrace("luaSpritePlayAnimation is deprecated! Use playAnim instead", false, true);
-        if(utilInstance.modchartSprites.exists(tag)) {
-            utilInstance.modchartSprites.get(tag).animation.play(name, forced);
+        if(utilInst().modchartSprites.exists(tag)) {
+            utilInst().modchartSprites.get(tag).animation.play(name, forced);
         }
     }
     public function setLuaSpriteCamera(tag:String, camera:String = '') {
         funkyTrace("setLuaSpriteCamera is deprecated! Use setObjectCamera instead", false, true);
-        if(utilInstance.modchartSprites.exists(tag)) {
-            utilInstance.modchartSprites.get(tag).cameras = [cameraFromString(camera)];
+        if(utilInst().modchartSprites.exists(tag)) {
+            utilInst().modchartSprites.get(tag).cameras = [cameraFromString(camera)];
             return true;
         }
         funkyTrace("Lua sprite with tag: " + tag + " doesn't exist!");
@@ -6482,16 +6556,16 @@ class FunkinUtil  {
     }
     public function setLuaSpriteScrollFactor(tag:String, scrollX:Float, scrollY:Float) {
         funkyTrace("setLuaSpriteScrollFactor is deprecated! Use setScrollFactor instead", false, true);
-        if(utilInstance.modchartSprites.exists(tag)) {
-            utilInstance.modchartSprites.get(tag).scrollFactor.set(scrollX, scrollY);
+        if(utilInst().modchartSprites.exists(tag)) {
+            utilInst().modchartSprites.get(tag).scrollFactor.set(scrollX, scrollY);
             return true;
         }
         return false;
     }
     public function scaleLuaSprite(tag:String, x:Float, y:Float) {
         funkyTrace("scaleLuaSprite is deprecated! Use scaleObject instead", false, true);
-        if(utilInstance.modchartSprites.exists(tag)) {
-            var shit:ModchartSprite = utilInstance.modchartSprites.get(tag);
+        if(utilInst().modchartSprites.exists(tag)) {
+            var shit:ModchartSprite = utilInst().modchartSprites.get(tag);
             shit.scale.set(x, y);
             shit.updateHitbox();
             return true;
@@ -6500,16 +6574,16 @@ class FunkinUtil  {
     }
     public function getPropertyLuaSprite(tag:String, variable:String) {
         funkyTrace("getPropertyLuaSprite is deprecated! Use getProperty instead", false, true);
-        if(utilInstance.modchartSprites.exists(tag)) {
+        if(utilInst().modchartSprites.exists(tag)) {
             var killMe:Array<String> = variable.split('.');
             if(killMe.length > 1) {
-                var coverMeInPiss:Dynamic = Reflect.getProperty(utilInstance.modchartSprites.get(tag), killMe[0]);
+                var coverMeInPiss:Dynamic = Reflect.getProperty(utilInst().modchartSprites.get(tag), killMe[0]);
                 for (i in 1...killMe.length-1) {
                     coverMeInPiss = Reflect.getProperty(coverMeInPiss, killMe[i]);
                 }
                 return Reflect.getProperty(coverMeInPiss, killMe[killMe.length-1]);
             }
-            return Reflect.getProperty(utilInstance.modchartSprites.get(tag), variable);
+            return Reflect.getProperty(utilInst().modchartSprites.get(tag), variable);
         }
         return null;
     }
@@ -6526,17 +6600,17 @@ class FunkinUtil  {
 
     public function setPropertyLuaSprite(tag:String, variable:String, value:Dynamic) {
         funkyTrace("setPropertyLuaSprite is deprecated! Use setProperty instead", false, true);
-        if(utilInstance.modchartSprites.exists(tag)) {
+        if(utilInst().modchartSprites.exists(tag)) {
             var killMe:Array<String> = variable.split('.');
             if(killMe.length > 1) {
-                var coverMeInPiss:Dynamic = Reflect.getProperty(utilInstance.modchartSprites.get(tag), killMe[0]);
+                var coverMeInPiss:Dynamic = Reflect.getProperty(utilInst().modchartSprites.get(tag), killMe[0]);
                 for (i in 1...killMe.length-1) {
                     coverMeInPiss = Reflect.getProperty(coverMeInPiss, killMe[i]);
                 }
                 Reflect.setProperty(coverMeInPiss, killMe[killMe.length-1], value);
                 return true;
             }
-            Reflect.setProperty(utilInstance.modchartSprites.get(tag), variable, value);
+            Reflect.setProperty(utilInst().modchartSprites.get(tag), variable, value);
             return true;
         }
         funkyTrace("Lua sprite with tag: " + tag + " doesn't exist!");

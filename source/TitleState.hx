@@ -130,12 +130,18 @@ class TitleState extends MusicBeatState
 	public function startHScript(name:String){
 		try{
 			initHaxeModule();
-			var y:String = Paths.getTextFromFile(name);
-			hscript.execute(y);
+			try{
+				var y:String = Paths.getTextFromFile(name);
+				hscript.execute(y);
+			}
+			catch(err){
+				trace(err);
+			}
 		}
 		catch(err){
-			trace(err);
-		}
+			trace("Could not initalize" + err);
+		}	
+		
 	}
 
 	public function quickCallHscript(event:String,args:Array<Dynamic>){
