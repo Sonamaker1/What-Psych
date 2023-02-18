@@ -26,6 +26,7 @@ import flixel.math.FlxMath;
 import flixel.util.FlxSave;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.system.FlxAssets.FlxShader;
+import flixel.FlxSubState;
 
 #if VIDEOS_ALLOWED 
 #if windows
@@ -64,7 +65,8 @@ interface BeatStateInterface {
 	public var modchartSounds:Map<String, FlxSound>;
 	public var modchartTexts:Map<String, ModchartText>;
 	public var modchartSaves:Map<String, FlxSave>;
-
+	public var runtimeShaders:Map<String, Array<String>>;
+	
 	private function updateBeat():Void;
 
 	private function updateCurStep():Void;
@@ -162,6 +164,16 @@ class MusicBeatState extends FlxUIState implements BeatStateInterface
 			openSubState(new CustomFadeTransition(0.7, true));
 		}
 		FlxTransitionableState.skipNextTransOut = false;
+	}
+
+	override function openSubState(SubState:FlxSubState){
+		PlayState.FunkinUtil.isSubstate=true;
+		super.openSubState(SubState);
+	}
+	
+	override function closeSubState(){
+		PlayState.FunkinUtil.isSubstate=false;
+		super.closeSubState();
 	}
 
 	override function update(elapsed:Float)
@@ -317,12 +329,12 @@ class MusicBeatState extends FlxUIState implements BeatStateInterface
 				CustomFadeTransition.finishCallback = function() {
 					FlxG.resetState();
 				};
-				//trace('resetted');
+				trace('resetted');
 			} else {
 				CustomFadeTransition.finishCallback = function() {
 					FlxG.switchState(nextState);
 				};
-				//trace('changed state');
+				trace('changed state');
 			}
 			return;
 		}
@@ -383,6 +395,8 @@ class ModchartSprite extends FlxSprite
 		antialiasing = ClientPrefs.globalAntialiasing;
 	}
 }
+
+
 
 class ModchartText extends FlxText
 {

@@ -91,7 +91,7 @@ class CustomFadeTransition extends MusicBeatSubstate {
 		#if hscript
 		gameStages = new Map<String,FunkyFunct>();
 		instance = this;
-		funk = new PlayState.FunkinUtil(instance, false, true);
+		//funk = new PlayState.FunkinUtil(instance, false, true);
 		#end
 		this.duration = duration;
 		this.isTransIn = isTransIn;
@@ -179,6 +179,7 @@ class CustomFadeTransition extends MusicBeatSubstate {
 			finishCallback();
 			leTween.cancel();
 		}
+		PlayState.FunkinUtil.isSubstate = false;
 		super.destroy();
 	}
 }

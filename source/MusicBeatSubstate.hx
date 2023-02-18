@@ -46,6 +46,7 @@ import MusicBeatState.BeatStateInterface;
 
 class MusicBeatSubstate extends FlxSubState implements BeatStateInterface
 {
+	
 	public var camGame:FlxCamera;
 
 	public function getControl(key:String) {
@@ -192,4 +193,5 @@ class MusicBeatSubstate extends FlxSubState implements BeatStateInterface
 			trace("\n["+event+"] Stage Function Error: " + err);
 		}
 	}
+	
 }

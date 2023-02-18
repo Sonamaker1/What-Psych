@@ -99,6 +99,7 @@ class MainMenuState extends MusicBeatState
 	}
 	#end
 
+	
 	override function create()
 	{
 		#if MODS_ALLOWED
