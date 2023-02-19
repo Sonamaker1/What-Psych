@@ -17,8 +17,66 @@ import flixel.util.FlxColor;
 import flixel.FlxCamera;
 import flixel.util.FlxStringUtil;
 
+
+#if hscript
+import hscript.Parser;
+import hscript.Interp;
+import hscript.Expr;
+import PlayState.FunkinUtil;
+import FunkinLua.HScript;
+import FunkinLua.CustomSubstate;
+import MusicBeatState.FunkyFunct;
+#if (!flash && sys)
+import flixel.addons.display.FlxRuntimeShader;
+#end
+#end
+
+
 class PauseSubState extends MusicBeatSubstate
 {
+	public var curMod ="";
+	var instance:MusicBeatSubstate;
+	#if hscript
+	public static var funk:FunkinUtil;
+	public static var gameStages:Map<String,FunkyFunct>;
+	public var hscript:HScript = null;
+	public static var iconMap:Map<Alphabet,FlxSprite> = new Map<Alphabet,FlxSprite>();
+	
+	public function initHaxeModule()
+	{
+		
+		hscript = null; //man I hate this
+		//TODO: make a destroy function for hscript interpreter
+		try{
+			if(hscript == null)
+			{
+				trace('initializing haxe interp for StoryMenuState');
+				hscript = new HScript(true, gameStages); //TO DO: Fix issue with 2 scripts not being able to use the same variable names
+				hscript.interp.variables.set('game', this);
+				hscript.interp.variables.set('funk', funk);
+				hscript.interp.variables.set('CustomFadeTransition', CustomFadeTransition);
+				hscript.interp.variables.set('iconMap', iconMap);
+			}
+		}catch(err){
+			trace("Failed to intialize HScript (CustomFadeTransition)");
+		}
+	}
+	public function startHScript(name:String){
+		try{
+			initHaxeModule();
+			var y:String = Paths.getTextFromFile(name);
+			hscript.execute(y);
+		}
+		catch(err){
+			trace(err);
+		}
+	}
+
+	public function quickCallHscript(event:String,args:Array<Dynamic>){
+		callStageFunctions(event,args,gameStages);
+	}
+	#end
+	
 	var grpMenuShit:FlxTypedGroup<Alphabet>;
 
 	var menuItems:Array<String> = [];
@@ -32,12 +90,22 @@ class PauseSubState extends MusicBeatSubstate
 	var skipTimeTracker:Alphabet;
 	var curTime:Float = Math.max(0, Conductor.songPosition);
 	//var botplayText:FlxText;
+	var bg:FlxSprite;
 
 	public static var songName:String = '';
 
 	public function new(x:Float, y:Float)
 	{
 		super();
+		#if hscript
+		gameStages = new Map<String,FunkyFunct>();
+		instance = this;
+		//funk = new PlayState.FunkinUtil(instance, false, true);
+		#end
+		startHScript("data/PauseSubAddons.hx");
+		
+		quickCallHscript("create",[]);
+		
 		if(CoolUtil.difficulties.length < 2) menuItemsOG.remove('Change Difficulty'); //No need to change difficulty if there is only one!
 
 		if(PlayState.chartingMode)
@@ -74,7 +142,7 @@ class PauseSubState extends MusicBeatSubstate
 
 		FlxG.sound.list.add(pauseMusic);
 
-		var bg:FlxSprite = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
+		bg = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
 		bg.alpha = 0;
 		bg.scrollFactor.set();
 		add(bg);
@@ -135,6 +203,8 @@ class PauseSubState extends MusicBeatSubstate
 
 		regenMenu();
 		cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
+	
+		quickCallHscript("createPost",[]);
 	}
 
 	var holdTime:Float = 0;
@@ -145,6 +215,7 @@ class PauseSubState extends MusicBeatSubstate
 		if (pauseMusic.volume < 0.5)
 			pauseMusic.volume += 0.01 * elapsed;
 
+		quickCallHscript("update",[elapsed]);
 		super.update(elapsed);
 		updateSkipTextStuff();
 
@@ -226,8 +297,10 @@ class PauseSubState extends MusicBeatSubstate
 					PlayState.changedDifficulty = true;
 					practiceText.visible = PlayState.instance.practiceMode;
 				case "Restart Song":
+					quickCallHscript("restartSong",[]);
 					restartSong();
 				case "Leave Charting Mode":
+					quickCallHscript("restartSong",[]);
 					restartSong();
 					PlayState.chartingMode = false;
 				case 'Skip Time':
@@ -270,6 +343,8 @@ class PauseSubState extends MusicBeatSubstate
 					PlayState.chartingMode = false;
 			}
 		}
+		quickCallHscript("updatePost",[elapsed]);
+		
 	}
 
 	function deleteSkipTimeText()
@@ -344,6 +419,7 @@ class PauseSubState extends MusicBeatSubstate
 	}
 
 	function regenMenu():Void {
+		quickCallHscript("regenMenu",[]);
 		for (i in 0...grpMenuShit.members.length) {
 			var obj = grpMenuShit.members[0];
 			obj.kill();
@@ -372,6 +448,8 @@ class PauseSubState extends MusicBeatSubstate
 		}
 		curSelected = 0;
 		changeSelection();
+		quickCallHscript("regenMenuPost",[]);
+		
 	}
 	
 	function updateSkipTextStuff()
