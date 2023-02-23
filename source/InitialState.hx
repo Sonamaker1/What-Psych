@@ -120,10 +120,15 @@ class InitialState extends MusicBeatState
 		try{
 			initHaxeModule();
 			var y:String = Paths.getTextFromFile(name);
-			hscript.execute(y);
+			try{
+				hscript.execute(y);
+			}
+			catch(err){
+				CoolUtil.displayErr(err);
+			}
 		}
 		catch(err){
-			trace(err);
+			trace("Asset not available: [" +name + "] ");
 		}
 	}
 

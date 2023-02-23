@@ -34,6 +34,15 @@ class CoolUtil
 		return (m / snap);
 	}
 
+	public static function displayErr(err:haxe.Exception){
+		var result:Dynamic = err.message;
+		if(result != null) {
+			lime.app.Application.current.window.alert(result, 'Error on .HX script!');
+			trace(err.details());
+			return;
+		}
+	}
+
 	public static function getDifficultyFilePath(num:Null<Int> = null)
 	{
 		if (num == null)

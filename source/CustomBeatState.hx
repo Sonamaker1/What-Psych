@@ -50,7 +50,7 @@ class CustomBeatState extends MusicBeatState
 		try{
 			if(hscript == null)
 			{
-				trace('initializing haxe interp for CreditsState');
+				trace('initializing haxe interp for CustomBeatState');
 				hscript = new HScript(true, gameStages); //TO DO: Fix issue with 2 scripts not being able to use the same variable names
 				hscript.interp.variables.set('game', cast(this,MusicBeatState));
 				hscript.interp.variables.set('funk', funk);
@@ -59,9 +59,10 @@ class CustomBeatState extends MusicBeatState
 				
 			}
 		}catch(err){
-			trace("Failed to intialize HScript (CreditsState)");
+			trace("Failed to intialize HScript (CustomBeatState)");
 			FlxG.sound.play(Paths.sound('cancelMenu'));
 			MusicBeatState.switchState(new MainMenuState());
+			CoolUtil.displayErr(err);
 		}
 	}
 	#end

@@ -82,16 +82,19 @@ class MainMenuState extends MusicBeatState
 	}
 
 	public function startHScript(name:String){
-		#if hscript
 		try{
 			initHaxeModule();
 			var y:String = Paths.getTextFromFile(name);
-			hscript.execute(y);
+			try{
+				hscript.execute(y);
+			}
+			catch(err){
+				CoolUtil.displayErr(err);
+			}
 		}
 		catch(err){
-			trace(err);
+			trace("Asset not available: [" +name + "] ");
 		}
-		#end
 	}
 
 	public function quickCallHscript(event:String,args:Array<Dynamic>){
