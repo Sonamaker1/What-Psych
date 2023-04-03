@@ -90,7 +90,7 @@ class CreditsState extends MusicBeatState
 
 	override function create()
 	{
-		curMod = Paths.currentModDirectory;
+		curMod = Paths.hscriptModDirectory;
 		#if desktop
 		// Updating Discord Rich Presence
 		DiscordClient.changePresence("In the Menus", null);

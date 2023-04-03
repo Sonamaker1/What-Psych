@@ -39,7 +39,7 @@ using StringTools;
 class StoryMenuState extends MusicBeatState
 {
 
-	public var curMod ="";
+	public static var curMod ="";
 	var instance:StoryMenuState;
 	#if hscript
 	public static var funk:FunkinUtil;
@@ -101,7 +101,7 @@ class StoryMenuState extends MusicBeatState
 
 	override function create()
 	{
-		curMod = Paths.currentModDirectory;
+		StoryMenuState.curMod = ''+Paths.hscriptModDirectory;
 		Paths.clearStoredMemory();
 		Paths.clearUnusedMemory();
 
@@ -244,13 +244,13 @@ class StoryMenuState extends MusicBeatState
 
 		super.create();
 
-		Paths.currentModDirectory = curMod;
+		Paths.currentModDirectory = StoryMenuState.curMod;
 		#if hscript
 		initHaxeModule();
-		runHScript("data/StoryMenuAddons.hx",hscript, curMod);
+		runHScript("data/StoryMenuAddons.hx",hscript, StoryMenuState.curMod);
 		#end
-		quickCallHscript("changeWeek",[]);
-		quickCallHscript("changeDifficulty",[]);
+		quickCallHscript("changeWeek",[0]);
+		quickCallHscript("changeDifficulty",[0]);
 	}
 
 	override function closeSubState() {

@@ -259,6 +259,7 @@ class WeekData {
 				{
 					foundTheTop = true;
 					Paths.currentModDirectory = dat[0];
+					Paths.hscriptModDirectory = dat[0];
 				}
 			}
 		}

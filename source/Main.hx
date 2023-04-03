@@ -73,6 +73,7 @@ class Main extends Sprite
 		setupGame();
 	}
 
+	public static var gameRender:FlxGame;
 	private function setupGame():Void
 	{
 		var stageWidth:Int = Lib.current.stage.stageWidth;
@@ -88,7 +89,8 @@ class Main extends Sprite
 		}
 	
 		ClientPrefs.loadDefaultKeys();
-		addChild(new FlxGame(game.width, game.height, game.initialState, #if (flixel < "5.0.0") game.zoom, #end game.framerate, game.framerate, game.skipSplash, game.startFullscreen));
+		gameRender = new FlxGame(game.width, game.height, game.initialState, #if (flixel < "5.0.0") game.zoom, #end game.framerate, game.framerate, game.skipSplash, game.startFullscreen);
+		addChild(gameRender);
 
 		#if !mobile
 		fpsVar = new FPS(10, 3, 0xFFFFFF);

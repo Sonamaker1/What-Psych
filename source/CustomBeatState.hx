@@ -39,7 +39,7 @@ class CustomBeatState extends MusicBeatState
 	public static var gameStages:Map<String,FunkyFunct>;
 	public static var hscript:HScript = null;
 	public var curMod ="";
-	
+	public static var enableSwitchBack = true;
 	public static var iconMap:Map<Alphabet,FlxSprite> = new Map<Alphabet,FlxSprite>();
 	
 	public function initHaxeModule()
@@ -52,6 +52,9 @@ class CustomBeatState extends MusicBeatState
 			{
 				trace('initializing haxe interp for CustomBeatState');
 				hscript = new HScript(true, gameStages); //TO DO: Fix issue with 2 scripts not being able to use the same variable names
+				hscript.onParserError=function(){
+					MusicBeatState.switchState(new MainMenuState());
+				};
 				hscript.interp.variables.set('game', cast(this,MusicBeatState));
 				hscript.interp.variables.set('funk', funk);
 				hscript.interp.variables.set('iconMap', iconMap);
@@ -78,7 +81,7 @@ class CustomBeatState extends MusicBeatState
 
 	override function create()
 	{
-		curMod = Paths.currentModDirectory;
+		curMod = Paths.hscriptModDirectory;
 		trace("creation");
 		instance = this;
 		#if hscript
@@ -119,9 +122,9 @@ class CustomBeatState extends MusicBeatState
 	
 	override function update(elapsed:Float)
 	{
-		quickCallHscript("update",[]);
+		quickCallHscript("update",[elapsed]);
 		super.update(elapsed);
-		quickCallHscript("updatePost",[]);
+		quickCallHscript("updatePost",[elapsed]);
 	}
 
 	override function destroy()

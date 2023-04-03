@@ -8,6 +8,7 @@ import llua.State;
 import llua.Convert;
 #end
 
+import hscript.ExtendBasic;
 import animateatlas.AtlasFrameMaker;
 import flixel.FlxG;
 import flixel.addons.effects.FlxTrail;
@@ -37,6 +38,8 @@ import flixel.math.FlxMath;
 import flixel.util.FlxSave;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.system.FlxAssets.FlxShader;
+import flixel.text.FlxBitmapText;
+import flixel.graphics.frames.FlxBitmapFont;
 
 #if (!flash && sys)
 import flixel.addons.display.FlxRuntimeShader;
@@ -3371,7 +3374,7 @@ class HScript
 {
 	public static var parser:Parser = new Parser();
 	public var interp:Interp;
-
+	public var onParserError:Void->Void =null;
 	public var variables(get, never):Map<String, Dynamic>;
 
 	public function get_variables()
@@ -3381,6 +3384,7 @@ class HScript
 
 	public function new(?addons:Bool,?gameStages:Map<String,FunkyFunct>)
 	{
+		
 		interp = new Interp();
 		interp.variables.set('FlxG', FlxG);
 		interp.variables.set('FlxSprite', FlxSprite);
@@ -3440,6 +3444,7 @@ class HScript
 			interp.variables.set('Alphabet', Alphabet);
 			interp.variables.set('CustomSubstate', CustomSubstate);
 			interp.variables.set('Reflect', Reflect);
+			interp.variables.set('ExtendBasic',ExtendBasic);
 			cast
 			#if (!flash && sys)
 			interp.variables.set('FlxRuntimeShader', FlxRuntimeShader);
@@ -3452,6 +3457,9 @@ class HScript
 			
 			interp.variables.set('FlxText',FlxText );
 			interp.variables.set('FlxTextBorderStyle',FlxTextBorderStyle);
+			
+			interp.variables.set('FlxBitmapText',FlxBitmapText );
+			interp.variables.set('FlxBitmapFont',FlxBitmapFont );
 			
 			//Thanks Neo!
 			interp.variables.set("import", function(pkg) {
@@ -3469,12 +3477,31 @@ class HScript
 		}
 	}
 
+	public function onParserErr(stringToDisplay:String):Void
+	{
+		trace(stringToDisplay);
+		if(onParserError!=null){
+			onParserError();
+		}
+	}
+
 	public function execute(codeToRun:String):Dynamic
 	{
 		@:privateAccess
 		HScript.parser.line = 1;
 		HScript.parser.allowTypes = true;
-		return interp.execute(HScript.parser.parseString(codeToRun));
+		HScript.parser.allowJSON = true; //W: YIPPEE! ty Neo again lol
+		var parsed = HScript.parser.parseString(codeToRun);
+		var runningExec:Dynamic;
+		try{
+			runningExec = interp.execute(parsed);
+		}
+		catch(err){
+			// I am not sorry for this code its fixing my workflow
+			onParserErr("Wow an error");
+			runningExec = interp.execute(parsed);
+		}
+		return runningExec;
 	}
 }
 #end

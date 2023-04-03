@@ -184,6 +184,7 @@ class MasterEditorMenu extends MusicBeatState
 		{
 			Paths.currentModDirectory = directories[curDirectory];
 			directoryTxt.text = '< Loaded Mod Directory: ' + Paths.currentModDirectory + ' >';
+			Paths.hscriptModDirectory = Paths.currentModDirectory;
 		}
 		directoryTxt.text = directoryTxt.text.toUpperCase();
 	}

@@ -113,6 +113,7 @@ class Paths
 	}
 
 	static public var currentModDirectory:String = '';
+	static public var hscriptModDirectory:String = '';
 	static public var currentLevel:String;
 	static public function setCurrentLevel(name:String)
 	{
