@@ -35,12 +35,17 @@ import flixel.addons.display.FlxRuntimeShader;
 #end
 #end
 
+//import SkewedBackdrop;
+
 using StringTools;
 
 class MainMenuState extends MusicBeatState
 {
 	public static var psychEngineVersion:String = '0.6.3'; //This is also used for Discord RPC
 	public static var curSelected:Int = 0;
+	public static var onError:(String,String)->Void=null;
+	public static var errDetails:String;
+	public static var errBrief:String;
 
 	var menuItems:FlxTypedGroup<FlxSprite>;
 	private var camAchievement:FlxCamera;
@@ -89,7 +94,9 @@ class MainMenuState extends MusicBeatState
 				hscript.execute(y);
 			}
 			catch(err){
-				CoolUtil.displayErr(err);
+				onError = CoolUtil.displayError;
+				errBrief = err.message;
+				errDetails = err.details();
 			}
 		}
 		catch(err){
@@ -238,9 +245,19 @@ class MainMenuState extends MusicBeatState
 	#end
 
 	var selectedSomethin:Bool = false;
+	
+	var totalelapsed=0.0;
+	function timedPopup(elapsed:Float){
+		totalelapsed+=elapsed;
+		if(totalelapsed>2){
+			onError(errBrief,errDetails);
+			onError=null;
+		}
+	}
 
 	override function update(elapsed:Float)
 	{
+		
 		if (FlxG.sound.music!=null && FlxG.sound.music.volume < 0.8)
 		{
 			FlxG.sound.music.volume += 0.5 * FlxG.elapsed;
@@ -336,6 +353,10 @@ class MainMenuState extends MusicBeatState
 		super.update(elapsed);
 
 		quickCallHscript("update",[elapsed]);
+		if(onError!=null && errBrief!=null){
+			timedPopup(elapsed);
+		}
+		
 	}
 
 	function changeItem(huh:Int = 0)

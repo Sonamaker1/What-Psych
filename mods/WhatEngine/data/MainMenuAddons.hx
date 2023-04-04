@@ -88,14 +88,17 @@ GameStages.set("update",{func:function(?elapsed:float)
 }});
 
 
-var cameraFollowPointer = new FlxSprite();
+/*var cameraFollowPointer = new FlxSprite();
 trace(cameraFollowPointer);
 cameraFollowPointer.loadGraphic(Paths.image('cursor'));
 //cameraFollowPointer.loadGraphic(pointer);
+
 cameraFollowPointer.setGraphicSize(0, 40);
 cameraFollowPointer.updateHitbox();
 cameraFollowPointer.color = 0xFFFFFFFF;
 //game.add(cameraFollowPointer);
+*/
+FlxG.mouse.load(Paths.image('cursor'), 0.4, 0,0);
 
 import("CustomBeatState");
 
@@ -110,15 +113,16 @@ function clickAndDrag(sprite:ClickableSprite, pos:Dynamic){
 
 GameStages.set("update",{func:function(elapsed:Float)
 {
-    cameraFollowPointer.setPosition(FlxG.mouse.getPosition().x-2, FlxG.mouse.getPosition().y-2);
-           
+    //cameraFollowPointer.setPosition(FlxG.mouse.getPosition().x-2, FlxG.mouse.getPosition().y-2);
+    
+       
     if(mover.clicked){
         clickAndDrag(mover,FlxG.mouse.getPosition());
     }
-    if(game.members.indexOf(cameraFollowPointer)>game.members.length-1){
+    /*if(game.members.indexOf(cameraFollowPointer)>game.members.length-1){
         game.remove(cameraFollowPointer);
         game.insert(game.members.length,cameraFollowPointer);
-    }
+    }*/
     
     //Refresh page to test
     if(FlxG.keys.justPressed.R){
@@ -135,7 +139,7 @@ trace(mover.functs);
 //mover.loadGraphic(Paths.image(''));
 //mover.setPosition(200,200);
 game.add(mover);
-game.add(cameraFollowPointer);
+//game.add(cameraFollowPointer);
 
 
 

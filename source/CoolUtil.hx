@@ -1,5 +1,6 @@
 package;
 
+import flixel.util.FlxColor;
 import flixel.FlxG;
 import openfl.utils.Assets;
 import lime.utils.Assets as LimeAssets;
@@ -12,6 +13,14 @@ import sys.FileSystem;
 #else
 import openfl.utils.Assets;
 #end
+
+import lime.graphics.opengl.*;
+import lime.utils.ArrayBufferView;
+import lime.utils.Float32Array;
+import openfl.Lib;
+import openfl.text.TextField;
+import openfl.geom.Rectangle;
+import openfl.display.Shape;
 
 using StringTools;
 
@@ -34,11 +43,81 @@ class CoolUtil
 		return (m / snap);
 	}
 
+
 	public static function displayErr(err:haxe.Exception){
-		var result:Dynamic = err.message;
+		displayError(err.message,err.details());
+	}
+
+	public static function displayError(result:String,details:String){
+		//var result:Dynamic = err.message;
 		if(result != null) {
-			lime.app.Application.current.window.alert(result, 'Error on .HX script!');
-			trace(err.details());
+			#if windows 
+				lime.app.Application.current.window.alert(result, 'Error on .HX script!'); 
+			#end
+
+			#if linux 
+				var copyVals = ["x","y"];
+				var win = Lib.application.createWindow({alwaysOnTop:true,  width: 550, height: 200 });
+				var appWin = lime.app.Application.current.window;
+				win.title = 'Error on .HX script!';
+				win.stage.color = FlxColor.GRAY;
+				for(val in Reflect.fields(lime.app.Application.current.window)){
+					//trace(val);
+					if(copyVals.indexOf(val)>=0){
+						Reflect.setProperty(win,val,Reflect.getProperty(lime.app.Application.current.window, val));
+					}
+				}
+				win.y+=Std.int(appWin.height/2-win.height/2);
+				win.x+=Std.int(appWin.width/2-win.width/2);
+				appWin.stage.addChild(Main.gameRender);
+				
+				
+				var rect1 = new Shape ();
+				rect1.graphics.beginFill(0x000000);
+				rect1.graphics.drawRect (19, 19, win.width-38, 32);
+				rect1.graphics.endFill();
+				win.stage.addChild (rect1);
+				
+				var rect2 = new Shape ();
+				rect2.graphics.beginFill(0xFFFFFF);
+				rect2.graphics.drawRect (20, 20, win.width-40, 30);
+				rect2.graphics.endFill();
+				win.stage.addChild (rect2);
+
+				var myText = new TextField ();
+				myText.text = result;
+				myText.wordWrap=false;
+				myText.width=win.width-40;
+				myText.height=30;
+				myText.x=20;
+				myText.y=20;
+				win.stage.addChild (myText);
+				
+				var text1 = new TextField ();
+				text1.text = details;
+				text1.wordWrap=false;
+				text1.width=win.width-40;
+				text1.height=win.height-80;
+				text1.x=20;
+				text1.y=50;
+				win.stage.addChild (text1);
+				var cleaner:Void->Void;
+				function cleanUp(){
+					trace("cleaning");
+					win.stage.removeChild(rect1);
+					win.stage.removeChild(rect2);
+					win.stage.removeChild(text1);
+					win.stage.removeChild(myText);
+					appWin.stage.addChild(Main.gameRender);
+					win.onClose.remove(cleaner);
+				}
+				cleaner=cleanUp;
+				
+				win.onClose.add(cleaner);
+			#end
+			
+			
+			trace(details);
 			return;
 		}
 	}
