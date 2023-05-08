@@ -4003,6 +4003,16 @@ class PlayState extends MusicBeatState
 		setOnLuas('ratingFC', ratingFC);
 	}
 
+	public function bypass_closeSubState(){super.closeSubState();}
+	public function bypass_create(){super.create();}
+	public function bypass_destroy(){super.destroy();}
+	public function bypass_onFocus(){super.onFocus();}
+	public function bypass_onFocusLost(){super.onFocusLost();}
+	public function bypass_openSubState(SubState:FlxSubState){super.openSubState(SubState);}
+	public function bypass_stepHit(){super.stepHit();}
+	public function bypass_beatHit(){super.beatHit();}
+	public function bypass_update(elapsed:Float){super.update(elapsed);}
+
 	#if ACHIEVEMENTS_ALLOWED
 	private function checkForAchievement(achievesToCheck:Array<String> = null):String
 	{

@@ -126,25 +126,28 @@ class FunkinLua {
 
 		// Song/Week shit
 		set('curBpm', Conductor.bpm);
-		set('bpm', PlayState.SONG.bpm);
-		set('scrollSpeed', PlayState.SONG.speed);
 		set('crochet', Conductor.crochet);
 		set('stepCrochet', Conductor.stepCrochet);
 		set('songLength', FlxG.sound.music.length);
-		set('songName', PlayState.SONG.song);
-		set('songPath', Paths.formatToSongPath(PlayState.SONG.song));
-		set('startedCountdown', false);
-		set('curStage', PlayState.SONG.stage);
-
-		set('isStoryMode', PlayState.isStoryMode);
-		set('difficulty', PlayState.storyDifficulty);
-
 		var difficultyName:String = CoolUtil.difficulties[PlayState.storyDifficulty];
-		set('difficultyName', difficultyName);
-		set('difficultyPath', Paths.formatToSongPath(difficultyName));
 		set('weekRaw', PlayState.storyWeek);
 		set('week', WeekData.weeksList[PlayState.storyWeek]);
 		set('seenCutscene', PlayState.seenCutscene);
+
+		if(PlayState.SONG!=null){
+			set('bpm', PlayState.SONG.bpm);
+			set('scrollSpeed', PlayState.SONG.speed);
+			set('songName', PlayState.SONG.song);
+			set('songPath', Paths.formatToSongPath(PlayState.SONG.song));
+			set('startedCountdown', false);
+			set('curStage', PlayState.SONG.stage);
+
+			set('isStoryMode', PlayState.isStoryMode);
+			set('difficulty', PlayState.storyDifficulty);
+
+			set('difficultyName', difficultyName);
+			set('difficultyPath', Paths.formatToSongPath(difficultyName));
+		}
 
 		// Camera poo
 		set('cameraX', 0);
@@ -174,33 +177,35 @@ class FunkinLua {
 		set('altAnim', false);
 		set('gfSection', false);
 
-		// Gameplay settings
-		set('healthGainMult', PlayState.instance.healthGain);
-		set('healthLossMult', PlayState.instance.healthLoss);
-		set('playbackRate', PlayState.instance.playbackRate);
-		set('instakillOnMiss', PlayState.instance.instakillOnMiss);
-		set('botPlay', PlayState.instance.cpuControlled);
-		set('practice', PlayState.instance.practiceMode);
+		if(PlayState.SONG!=null){
+			// Gameplay settings
+			set('healthGainMult', PlayState.instance.healthGain);
+			set('healthLossMult', PlayState.instance.healthLoss);
+			set('playbackRate', PlayState.instance.playbackRate);
+			set('instakillOnMiss', PlayState.instance.instakillOnMiss);
+			set('botPlay', PlayState.instance.cpuControlled);
+			set('practice', PlayState.instance.practiceMode);
 
-		for (i in 0...4) {
-			set('defaultPlayerStrumX' + i, 0);
-			set('defaultPlayerStrumY' + i, 0);
-			set('defaultOpponentStrumX' + i, 0);
-			set('defaultOpponentStrumY' + i, 0);
+			for (i in 0...4) {
+				set('defaultPlayerStrumX' + i, 0);
+				set('defaultPlayerStrumY' + i, 0);
+				set('defaultOpponentStrumX' + i, 0);
+				set('defaultOpponentStrumY' + i, 0);
+			}
+		
+			// Default character positions woooo
+			set('defaultBoyfriendX', PlayState.instance.BF_X);
+			set('defaultBoyfriendY', PlayState.instance.BF_Y);
+			set('defaultOpponentX', PlayState.instance.DAD_X);
+			set('defaultOpponentY', PlayState.instance.DAD_Y);
+			set('defaultGirlfriendX', PlayState.instance.GF_X);
+			set('defaultGirlfriendY', PlayState.instance.GF_Y);
+
+			// Character shit
+			set('boyfriendName', PlayState.SONG.player1);
+			set('dadName', PlayState.SONG.player2);
+			set('gfName', PlayState.SONG.gfVersion);
 		}
-
-		// Default character positions woooo
-		set('defaultBoyfriendX', PlayState.instance.BF_X);
-		set('defaultBoyfriendY', PlayState.instance.BF_Y);
-		set('defaultOpponentX', PlayState.instance.DAD_X);
-		set('defaultOpponentY', PlayState.instance.DAD_Y);
-		set('defaultGirlfriendX', PlayState.instance.GF_X);
-		set('defaultGirlfriendY', PlayState.instance.GF_Y);
-
-		// Character shit
-		set('boyfriendName', PlayState.SONG.player1);
-		set('dadName', PlayState.SONG.player2);
-		set('gfName', PlayState.SONG.gfVersion);
 
 		// Some settings, no jokes
 		set('downscroll', ClientPrefs.downScroll);
@@ -3429,6 +3434,7 @@ class HScript
 		});
 
 		if(addons){
+			interp.variables.set('FlxBackdrop', flixel.addons.display.FlxBackdrop);
 			interp.variables.set('FlxG', FlxG);
 			interp.variables.set('Main', Main);
 			interp.variables.set('FlxSprite', FlxSprite);

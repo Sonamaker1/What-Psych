@@ -111,6 +111,7 @@ class CustomFadeTransition extends MusicBeatSubstate {
 			hscript.interp.variables.set("zoom",zoom);
 			hscript.interp.variables.set("width",width);
 			hscript.interp.variables.set("height",height);
+			hscript.interp.variables.set("isTransIn",isTransIn);
 		}
 		
 		quickCallHscript("create",[]);
@@ -125,7 +126,8 @@ class CustomFadeTransition extends MusicBeatSubstate {
 			transBlack = new FlxSprite().makeGraphic(width, height + 400, FlxColor.BLACK);
 			transBlack.scrollFactor.set();
 			add(transBlack);
-
+			quickCallHscript("graphicCreate",[]);
+		
 			transGradient.x -= (width - FlxG.width) / 2;
 			transBlack.x = transGradient.x;
 

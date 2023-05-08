@@ -109,9 +109,10 @@ class InitialState extends MusicBeatState
 		//TODO: make a destroy function for hscript interpreter
 		if(hscript == null)
 		{
-			trace('initializing haxe interp for TitleState');
+			trace('initializing haxe interp for InitialState');
 			hscript = new HScript(true, gameStages); //TO DO: Fix issue with 2 scripts not being able to use the same variable names
 			hscript.interp.variables.set('game', cast(this,MusicBeatState));
+			hscript.interp.variables.set('NewState', NewState);
 			hscript.interp.variables.set('funk', funk);
 		}
 	}
@@ -188,7 +189,7 @@ class InitialState extends MusicBeatState
 		//Conductor.changeBPM(titleJSON.bpm);
 		persistentUpdate = true;
 
-		startHScript("data/InitialState.hx");	
+		startHScript("data/FirstState.hx");	
         //FlxG.mouse.visible = false;
 		
 	}
