@@ -131,6 +131,9 @@ class MusicBeatState extends FlxUIState implements BeatStateInterface
 			if (FileSystem.exists(path)){
 				trace(path);
 				y = File.getContent(path);
+			}else if(FileSystem.exists(Paths.modFolders(name))){
+				trace(Paths.modFolders(modFolder+"/"+name));
+				y = File.getContent(path);
 			}else if(FileSystem.exists(Paths.modFolders(modFolder+"/"+name))){
 				trace(Paths.modFolders(modFolder+"/"+name));
 				y = File.getContent(path);
