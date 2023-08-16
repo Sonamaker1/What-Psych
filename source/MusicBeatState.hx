@@ -28,10 +28,10 @@ import flixel.addons.transition.FlxTransitionableState;
 import flixel.system.FlxAssets.FlxShader;
 import flixel.FlxSubState;
 
-#if VIDEOS_ALLOWED 
-#if windows
-import vlc.MP4Handler;
-#end
+#if VIDEOS_ALLOWED
+#if (hxCodec >= "2.6.1") import hxcodec.VideoHandler as MP4Handler;
+#elseif (hxCodec == "2.6.0") import VideoHandler as MP4Handler;
+#else import vlc.MP4Handler; #end
 #end
 
 #if !html5
