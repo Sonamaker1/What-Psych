@@ -16,15 +16,29 @@
 - Special Thanks to [Juno](https://twitter.com/anilmky_nikko) for the What Engine logo!
 
 ## Default supported hscript menus:
-- mods/Your Mod/data/TitleStateAddons.hx
+- mods/Your Mod/states/AchievementsMenuAddons.hx
 
-- mods/Your Mod/data/MainMenuAddons.hx
+- mods/Your Mod/states/CreditsAddons.hx
 
-- mods/Your Mod/data/StoryMenuAddons.hx
+- mods/Your Mod/states/CustomBeatAddons.hx
 
-- mods/Your Mod/data/FreeplayAddons.hx
+- mods/Your Mod/states/FreeplayAddons.hx
 
-- mods/Your Mod/data/CreditsAddons.hx
+- mods/Your Mod/states/MainMenuAddons.hx
+
+- mods/Your Mod/states/options.NoteOffsetAddons.hx
+
+- mods/Your Mod/states/options.OptionsAddons.hx
+
+- mods/Your Mod/states/PlayAddons.hx
+
+- mods/Your Mod/states/StoryMenuAddons.hx
+
+- mods/Your Mod/states/TitleAddons.hx
+
+- mods/Your Mod/states/ErrorState.hx
+
+- mods/Your Mod/states/FirstState.hx
 
 ## Custom states (can be named anything)
 - mods/Your Mod/data/AnyNameYouWant.hx

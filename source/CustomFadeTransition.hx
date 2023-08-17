@@ -100,7 +100,7 @@ class CustomFadeTransition extends MusicBeatSubstate {
 		#end
 		this.duration = duration;
 		this.isTransIn = isTransIn;
-		startHScript("data/CustomTransition.hx");
+		startHScript("states/CustomTransition.hx");
 		
 		
 		var zoom:Float = CoolUtil.boundTo(FlxG.camera.zoom, 0.05, 1);

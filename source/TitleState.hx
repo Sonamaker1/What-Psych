@@ -483,7 +483,7 @@ class TitleState extends MusicBeatState
 
 		// credGroup.add(credTextShit);
 
-		startHScript("data/TitleStateAddons.hx");		
+		startHScript("states/TitleAddons.hx");		
 	}
 
 	function getIntroColors():Array<FlxColor>

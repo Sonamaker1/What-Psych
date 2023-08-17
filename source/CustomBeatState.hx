@@ -93,7 +93,7 @@ class CustomBeatState extends MusicBeatState
 		//PlayState.instance.callOnLuas('create', [name]);
 		#if hscript
 		initHaxeModule();
-		runHScript("data/"+name+".hx",hscript, curMod, true);
+		runHScript("states/"+name+".hx",hscript, curMod, true);
 		#end
 		quickCallHscript("create",[]);	
 		//There is no difference here, if 

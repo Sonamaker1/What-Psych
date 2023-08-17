@@ -247,7 +247,7 @@ class StoryMenuState extends MusicBeatState
 		Paths.currentModDirectory = StoryMenuState.curMod;
 		#if hscript
 		initHaxeModule();
-		runHScript("data/StoryMenuAddons.hx",hscript, StoryMenuState.curMod);
+		runHScript("states/StoryMenuAddons.hx",hscript, StoryMenuState.curMod);
 		#end
 		quickCallHscript("changeWeek",[0]);
 		quickCallHscript("changeDifficulty",[0]);

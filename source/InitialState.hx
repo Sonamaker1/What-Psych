@@ -185,11 +185,11 @@ class InitialState extends MusicBeatState
 		}
 
         Conductor.changeBPM(128.0);
-		FlxG.sound.playMusic(Paths.music('offsetSong'), 1, true);
+		//FlxG.sound.playMusic(Paths.music('offsetSong'), 1, true);
 		//Conductor.changeBPM(titleJSON.bpm);
 		persistentUpdate = true;
 
-		startHScript("data/FirstState.hx");	
+		startHScript("states/FirstState.hx");	
         //FlxG.mouse.visible = false;
 		
 	}

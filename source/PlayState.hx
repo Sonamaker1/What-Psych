@@ -1,5 +1,6 @@
 package;
 
+import MusicBeatState.FunkyFunct;
 import flixel.addons.ui.FlxUIState;
 import flixel.graphics.FlxGraphic;
 #if desktop
@@ -88,6 +89,8 @@ import sys.io.File;
 
 import Type.ValueType;
 using StringTools;
+
+
 
 class PlayState extends MusicBeatState
 {
@@ -307,11 +310,56 @@ class PlayState extends MusicBeatState
 		}
 	}
 
+	#if hscript
+	public static var gameStages:Map<String,FunkyFunct>;
+	public static var hscript:HScript = null; 
+
+	public function initHaxeModule()
+	{
+		
+		hscript = null; //man I hate this
+		//TODO: make a destroy function for hscript interpreter
+		if(hscript == null)
+		{
+			trace('initializing haxe interp for TitleState');
+			hscript = new HScript(true, gameStages); //TO DO: Fix issue with 2 scripts not being able to use the same variable names
+			hscript.interp.variables.set('game', cast(this,MusicBeatState));
+			hscript.interp.variables.set('funk', funk);
+			hscript.interp.variables.set('this', hscript);
+		}
+	}
+
+	public function startHScript(name:String){
+		try{
+			initHaxeModule();
+			var y:String = Paths.getTextFromFile(name);
+			try{
+				hscript.execute(y);
+			}
+			catch(err){
+				CoolUtil.displayErr(err);
+			}
+		}
+		catch(err){
+			trace("Asset not available: [" +name + "] ");
+		}
+	}
+
+	public function quickCallHscript(event:String,args:Array<Dynamic>){
+		//trace("STAGE: " + event);
+		callStageFunctions(event,args,gameStages);
+	}
+	#end
+		
 	override public function create()
 	{
 		//trace('Playback Rate: ' + playbackRate);
 		Paths.clearStoredMemory();
-
+		#if hscript
+		gameStages = new Map<String,FunkyFunct>();
+		instance = this;
+		funk = new PlayState.FunkinUtil(instance);
+		#end
 		// for lua
 		instance = this;
 
@@ -970,6 +1018,11 @@ class PlayState extends MusicBeatState
 		Paths.clearUnusedMemory();
 		
 		CustomFadeTransition.nextCamera = camOther;
+	
+		#if hscript
+		initHaxeModule();
+		runHScript("states/PlayAddons.hx", hscript, StoryMenuState.curMod);
+		#end
 	}
 
 	#if (!flash && sys)
@@ -3903,13 +3956,12 @@ class PlayState extends MusicBeatState
 		callOnLuas('onSectionHit', []);
 	}
 
-
-	
-
 	override public function callOnLuas(event:String, args:Array<Dynamic>, ?ignoreStops = true, ?exclusions:Array<String> = null):Dynamic {
+		quickCallHscript(event, args);
 		var returnVal:Dynamic = FunkinLua.Function_Continue;
 		#if LUA_ALLOWED
 		if(exclusions == null) exclusions = [];
+		
 		for (script in luaArray) {
 			if(exclusions.contains(script.scriptName))
 				continue;
@@ -3924,6 +3976,7 @@ class PlayState extends MusicBeatState
 				returnVal = cast ret;
 			}
 		}
+
 		#end
 
 		//callStageFunctions(event,args);

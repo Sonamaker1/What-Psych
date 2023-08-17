@@ -264,7 +264,7 @@ class FreeplayState extends MusicBeatState
 		Paths.currentModDirectory = curMod;
 		#if hscript
 		initHaxeModule();
-		runHScript("data/FreeplayAddons.hx",hscript, curMod);
+		runHScript("states/FreeplayAddons.hx",hscript, curMod);
 		#end
 		
 		quickCallHscript("changeSelection",[]);

@@ -228,7 +228,7 @@ class CreditsState extends MusicBeatState
 		Paths.currentModDirectory = curMod;
 		#if hscript
 		initHaxeModule();
-		runHScript("data/CreditsAddons.hx",hscript, curMod);
+		runHScript("states/CreditsAddons.hx",hscript, curMod);
 		#end
 		
 		quickCallHscript("changeSelection",[]);

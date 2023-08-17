@@ -107,7 +107,7 @@ class PauseSubState extends MusicBeatSubstate
 		instance = this;
 		//funk = new PlayState.FunkinUtil(instance, false, true);
 		#end
-		startHScript("data/PauseSubAddons.hx");
+		startHScript("states/PauseSubAddons.hx");
 		
 		quickCallHscript("create",[]);
 		

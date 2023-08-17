@@ -81,8 +81,10 @@
 	<section if="NO_PRELOAD_ALL">
 		<library name="songs"         preload="true" />
 		<library name="shared"        preload="false" />
+		<library name="states"        preload="true" />
 	</section>
 	
+	<assets path="assets/preload/states" library="states"/>
 	<assets path="assets/videos"        library="videos"        if="VIDEOS_ALLOWED"/>
 	<assets path="assets/songs"         library="songs"         exclude="*.ogg" if="web"/>
 	<assets path="assets/songs"         library="songs"         exclude="*.mp3" unless="web"/>

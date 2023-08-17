@@ -40,6 +40,8 @@ import sys.FileSystem;
 import sys.io.File;
 #end
 
+using StringTools;
+
 interface BeatStateInterface {
 	public var camGame:FlxCamera;
 	//public var members(default, null):Array<Dynamic>;
@@ -339,6 +341,9 @@ class MusicBeatState extends FlxUIState implements BeatStateInterface
 					FlxG.switchState(nextState);
 				};
 				trace('changed state');
+				var name = Type.getClassName(Type.getClass(nextState));
+				trace('['+name+']');
+				trace('New Name: ['+name.replace('State','Addons.hx') +']');
 			}
 			return;
 		}

@@ -79,7 +79,7 @@ class NewState extends PlayState
 		#end
 	}
 
-	public function initHaxeModule()
+	override public function initHaxeModule()
 	{
 		
 		hscript = null; //man I hate this but idk how else to do it lol
@@ -170,7 +170,7 @@ class NewState extends PlayState
 		}
 	}
 
-	public function quickCallHscript(event:String,args:Array<Dynamic>){
+	override public function quickCallHscript(event:String,args:Array<Dynamic>){
 		try{
 			var ret = hscript.variables.get(event);
 			if(ret != null){
@@ -225,7 +225,7 @@ class NewState extends PlayState
 		//PlayState.instance.callOnLuas('create', [name]);
 		#if hscript
 		initHaxeModule();
-		runHScript("data/"+name+".hx",hscript, curMod, true);
+		runHScript("states/"+name+".hx",hscript, curMod, true);
 		#end
 		quickCallHscript("create",[]);	
 		
