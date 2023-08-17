@@ -37,8 +37,10 @@ class FlashingState extends MusicBeatState
 		add(warnText);
 	}
 
+	var timer:Float = 0;
 	override function update(elapsed:Float)
 	{
+		
 		if(!leftState) {
 			var back:Bool = controls.BACK;
 			if (controls.ACCEPT || back) {
@@ -51,23 +53,20 @@ class FlashingState extends MusicBeatState
 					FlxG.sound.play(Paths.sound('confirmMenu'));
 					FlxFlicker.flicker(warnText, 1, 0.1, false, true, function(flk:FlxFlicker) {
 						new FlxTimer().start(0.5, function (tmr:FlxTimer) {
-							var mus:MusicBeatState = new CustomBeatState("FirstState");
-							if(mus!=null){
-								MusicBeatState.switchState(mus);
-							}
+							MusicBeatState.switchState(new InitialState());
 						});
 					});
 				} else {
 					FlxG.sound.play(Paths.sound('cancelMenu'));
 					FlxTween.tween(warnText, {alpha: 0}, 1, {
 						onComplete: function (twn:FlxTween) {
-							var mus:MusicBeatState = new CustomBeatState("FirstState");
-							if(mus!=null){
-								MusicBeatState.switchState(mus);
-							}
+							MusicBeatState.switchState(new InitialState());
 						}
 					});
 				}
+			}
+			else{
+				timer+=elapsed;
 			}
 		}
 		super.update(elapsed);

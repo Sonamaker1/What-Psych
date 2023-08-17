@@ -46,7 +46,7 @@ class CustomFadeTransition extends MusicBeatSubstate {
 		try{
 			if(hscript == null)
 			{
-				trace('initializing haxe interp for StoryMenuState');
+				trace('initializing haxe interp for CustomFadeTransition');
 				hscript = new HScript(true, gameStages); //TO DO: Fix issue with 2 scripts not being able to use the same variable names
 				hscript.interp.variables.set('game', this);
 				hscript.interp.variables.set('funk', funk);
