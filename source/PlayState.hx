@@ -2873,8 +2873,10 @@ class PlayState extends MusicBeatState
 	}
 
 	var cameraTwn:FlxTween;
+	public static var noCamMove = false;
 	public function moveCamera(isDad:Bool, ?isGF:Int = 0)
 	{
+		if(noCamMove) return;
 		//W: TODO, add the ability to disable camera movements per character
 		if(isGF > 0){
 			camFollow.set(gf.getMidpoint().x, gf.getMidpoint().y);
