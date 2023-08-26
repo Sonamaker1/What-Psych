@@ -313,7 +313,7 @@ class PlayState extends MusicBeatState
 	#if hscript
 	public static var gameStages:Map<String,FunkyFunct>;
 	public static var hscript:HScript = null; 
-
+	public static var curMod:String = '';
 	public function initHaxeModule()
 	{
 		
@@ -354,11 +354,11 @@ class PlayState extends MusicBeatState
 	override public function create()
 	{
 		//trace('Playback Rate: ' + playbackRate);
+		
 		Paths.clearStoredMemory();
 		#if hscript
+		curMod = Paths.hscriptModDirectory;
 		gameStages = new Map<String,FunkyFunct>();
-		instance = this;
-		funk = new PlayState.FunkinUtil(instance);
 		#end
 		// for lua
 		instance = this;
@@ -996,6 +996,11 @@ class PlayState extends MusicBeatState
 		//W: I don't know if this is still used but it seems important? 
 		//   Oh I see it was moved down to set playback rate lmao
 		//Conductor.safeZoneOffset = (ClientPrefs.safeFrames / 60) * 1000;
+		#if hscript
+		initHaxeModule();
+		runHScript("states/PlayAddons.hx", hscript, curMod);
+		#end
+		
 		callOnLuas('onCreatePost', []);
 
 		super.create();
@@ -1018,11 +1023,8 @@ class PlayState extends MusicBeatState
 		Paths.clearUnusedMemory();
 		
 		CustomFadeTransition.nextCamera = camOther;
-	
-		#if hscript
-		initHaxeModule();
-		runHScript("states/PlayAddons.hx", hscript, StoryMenuState.curMod);
-		#end
+		
+		
 	}
 
 	#if (!flash && sys)
@@ -3957,6 +3959,18 @@ class PlayState extends MusicBeatState
 	}
 
 	override public function callOnLuas(event:String, args:Array<Dynamic>, ?ignoreStops = true, ?exclusions:Array<String> = null):Dynamic {
+		
+		try{
+			var ret = hscript.variables.get(event);
+			if(ret != null){
+				
+				Reflect.callMethod(null, ret, args);
+			}
+		}
+		catch(err){
+			trace("\n["+event+"] Function Error: " + err);
+		}
+
 		quickCallHscript(event, args);
 		var returnVal:Dynamic = FunkinLua.Function_Continue;
 		#if LUA_ALLOWED

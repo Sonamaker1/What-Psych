@@ -41,7 +41,7 @@
 - mods/Your Mod/states/FirstState.hx
 
 ## Custom states (can be named anything)
-- mods/Your Mod/data/AnyNameYouWant.hx
+- mods/Your Mod/states/AnyNameYouWant.hx
 ```haxe
 import("CustomBeatState");
 
@@ -56,7 +56,7 @@ if(mus!=null){
 
 ## Overriding existing states (requires two files):
 ### Freeplay Menu Override Example
-- mods/Your Mod/data/FreeplayAddons.hx
+- mods/Your Mod/states/FreeplayAddons.hx
 ```haxe
 import("flixel.addons.transition.FlxTransitionableState");
 
@@ -78,7 +78,7 @@ if(mus!=null){
 }
 ```
 
-- mods/Your Mod/data/MyCustomState.hx
+- mods/Your Mod/states/MyCustomState.hx
 ```haxe
 import("flixel.addons.transition.FlxTransitionableState");
 import("MainMenuState");
