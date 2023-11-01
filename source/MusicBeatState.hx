@@ -1,5 +1,6 @@
 package;
 
+import flixel_4_11_0.ParallaxSprite;
 import Conductor.BPMChangeEvent;
 import flixel.FlxG;
 import flixel.addons.ui.FlxUIState;

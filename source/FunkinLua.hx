@@ -8,6 +8,7 @@ import llua.State;
 import llua.Convert;
 #end
 
+import DialogueUtil;
 import hscript.ExtendBasic;
 import animateatlas.AtlasFrameMaker;
 import flixel.FlxG;
@@ -2170,6 +2171,63 @@ class FunkinLua {
 		Lua_helper.add_callback(lua, "getRandomBool", function(chance:Float = 50) {
 			return FlxG.random.bool(chance);
 		});
+
+		Lua_helper.add_callback(lua, "say", function( dialogue:String, characterName:String)
+		{
+			trace("quick-say");
+			//var getCharacter = new DialogueCharacter(0,0, characterName);
+			var line = DialogueUtil.makeLine(dialogue, characterName, 'talk', 'normal', 0.05, '');
+			//trace(line);
+			return 0;
+		});
+
+
+		Lua_helper.add_callback(lua, "sayOption", function(id:Int, property:String, action:Dynamic)
+		{
+			var sayLine = DialogueUtil.getLine(id);
+			Reflect.setProperty(sayLine, property, action);
+			trace("Altered: ["+sayLine.text + "], "+property +":" + action);
+			return 0;
+		});
+	
+		//Experimental
+		Lua_helper.add_callback(lua, "addDialogue", function( dialogue:String, characterName:String, expression:String, boxState:String, speed:Float, sound:String)
+		{	
+			//expression:String = 'talk'
+			//boxState:String = 'normal'
+			//speed:Float = 0.05
+			//sound:String = ''
+
+			trace("ack");
+			//var getCharacter = new DialogueCharacter(0,0, characterName);
+			var line = DialogueUtil.makeLine(dialogue, characterName, expression,  boxState, speed, sound);
+			//trace(line);
+			return 1;
+		});
+		
+
+		Lua_helper.add_callback(lua, "clearDialogue", function() {
+			DialogueUtil.buffer = [];
+			return 0;
+		});
+
+		Lua_helper.add_callback(lua, "sayDialogue", function( music:String = null) {
+			var shit:DialogueFile = {dialogue: DialogueUtil.buffer};
+			if(shit.dialogue.length > 0) {
+				PlayState.instance.startDialogue(shit, music);
+				luaTrace('startDialogue: Successfully loaded dialogue', false, false, FlxColor.GREEN);
+				return true;
+			} else {
+				luaTrace('startDialogue: Your dialogue file is badly formatted!', false, false, FlxColor.RED);
+				if(PlayState.instance.endingSong) {
+					PlayState.instance.endSong();
+				} else {
+					PlayState.instance.startCountdown();
+				}
+			}
+			return false;
+		});
+
 		Lua_helper.add_callback(lua, "startDialogue", function(dialogueFile:String, music:String = null) {
 			var path:String;
 			#if MODS_ALLOWED
@@ -3431,6 +3489,17 @@ class HScript
 				return true;
 			}
 			return false;
+		});
+		interp.variables.set('addLuaToHscript', function(the_set_of_all_things_can_contain_itself:Bool)
+		{
+			if(the_set_of_all_things_can_contain_itself){
+				trace(Lua_helper.callbacks.keys());
+				for(v in Lua_helper.callbacks.keys()){
+					interp.variables.set(v,
+						Lua_helper.callbacks.get(v)
+					);
+				}
+			}
 		});
 
 		if(addons){
