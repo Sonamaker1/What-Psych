@@ -236,7 +236,6 @@ class MusicBeatState extends FlxUIState implements BeatStateInterface
 		}, true);
 		#else
 		FlxG.log.warn('Platform not supported!');
-		startAndEnd();
 		return;
 		#end
 	}
