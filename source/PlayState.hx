@@ -81,10 +81,7 @@ import sys.io.File;
 #end
 
 #if VIDEOS_ALLOWED 
-#if (hxCodec >= "3.0.0") import hxcodec.flixel.FlxVideo as MP4Handler;
-#elseif (hxCodec >= "2.6.1") import hxcodec.VideoHandler as MP4Handler;
-#elseif (hxCodec == "2.6.0") import VideoHandle as MP4Handler;
-#else import vlc.MP4Handler as MP4Handler; #end
+import hxcodec.flixel.FlxVideo;
 #end
 
 import Type.ValueType;
@@ -1245,13 +1242,14 @@ class PlayState extends MusicBeatState
 			return;
 		}
 
-		var video:MP4Handler = new MP4Handler();
-		video.playVideo(filepath);
-		video.finishCallback = function()
+		var video:FlxVideo = new FlxVideo();
+		video.play(filepath);
+		video.onEndReached.add(function()
 		{
+			video.dispose();
 			startAndEnd();
 			return;
-		}
+		}, true);
 		#else
 		FlxG.log.warn('Platform not supported!');
 		startAndEnd();
@@ -2110,10 +2108,7 @@ class PlayState extends MusicBeatState
 		vocals.play();
 	}
 
-	public static var maxLuaFPS = 60;
-	var fpsElapsed:Array<Float> = [0,0,0];
-	var numCalls:Array<Float> = [0,0,0];
-
+	
 	public var paused:Bool = false;
 	public var canReset:Bool = true;
 	var startedCountdown:Bool = false;
@@ -2127,24 +2122,8 @@ class PlayState extends MusicBeatState
 			iconP1.swapOldIcon();
 		}*/
 
-		// Limits the number of lua updates to 60/second, which fixes some crashes if FPS > 120
-		// on long songs with multiple scripts that use onUpdate() function
-
-		if(ClientPrefs.framerate <= maxLuaFPS){
-			
-			callOnLuas('onUpdate', [elapsed]);
-		}
-		else {
-			numCalls[0]+=1;
-			fpsElapsed[0]+=elapsed;
-			if(numCalls[0] >= Std.int(ClientPrefs.framerate/maxLuaFPS)){
-				//trace("New Update");
-				callOnLuas('onUpdate', [fpsElapsed[0]]);
-				fpsElapsed[0]=0;
-				numCalls[0]=0;
-
-			}
-		}
+		//THE FPS IS FREEEE THE LUA BUG IS GONE :fire: :fire: :fire: 
+		callOnLuas('onUpdate', [elapsed]);
 
 		//W: TODO update codes based on the current stage
 		if(!inCutscene) {
@@ -2461,20 +2440,10 @@ class PlayState extends MusicBeatState
 		setOnLuas('cameraY', camFollowPos.y);
 		setOnLuas('botPlay', cpuControlled);
 		
-		//Fix for high fps lua crashes
-		if(ClientPrefs.framerate <= maxLuaFPS){
-			callOnLuas('onUpdatePost', [elapsed]);
-		}
-		else {
-			numCalls[1]+=1;
-			fpsElapsed[1]+=elapsed;
-			if(numCalls[1] >= Std.int(ClientPrefs.framerate/maxLuaFPS)){
-				//trace("New UpdatePost");
-				callOnLuas('onUpdatePost', [fpsElapsed[1]]);
-				fpsElapsed[1]=0;
-				numCalls[1]=0;
-			}
-		}
+		//"Fix for high fps lua crashes" has been removed lolol
+		
+		callOnLuas('onUpdatePost', [elapsed]);
+		
 	}
 
 	function openPauseMenu()

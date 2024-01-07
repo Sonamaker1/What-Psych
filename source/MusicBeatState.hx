@@ -1,6 +1,5 @@
 package;
 
-import flixel_4_11_0.ParallaxSprite;
 import Conductor.BPMChangeEvent;
 import flixel.FlxG;
 import flixel.addons.ui.FlxUIState;
@@ -30,10 +29,7 @@ import flixel.system.FlxAssets.FlxShader;
 import flixel.FlxSubState;
 
 #if VIDEOS_ALLOWED 
-#if (hxCodec >= "3.0.0") import hxcodec.flixel.FlxVideo as MP4Handler;
-#elseif (hxCodec >= "2.6.1") import hxcodec.VideoHandler as MP4Handler;
-#elseif (hxCodec == "2.6.0") import VideoHandle as MP4Handler;
-#else import vlc.MP4Handler as MP4Handler; #end
+import hxcodec.flixel.FlxVideo;
 #end
 
 #if !html5
@@ -231,21 +227,17 @@ class MusicBeatState extends FlxUIState implements BeatStateInterface
 			return;
 		}
 
-		var video:MP4Handler = new MP4Handler();
-		video.playVideo(filepath);
-		video.finishCallback = function()
+		var video:FlxVideo = new FlxVideo();
+		video.play(filepath);
+		video.onEndReached.add(function()
 		{
-			onVideoEnd(filepath, true);
-			//startAndEnd();
+			video.dispose();
 			return;
-		}
+		}, true);
 		#else
-		#if windows
 		FlxG.log.warn('Platform not supported!');
-		onVideoEnd(filepath, false);
-		//startAndEnd();
+		startAndEnd();
 		return;
-		#end
 		#end
 	}
 
